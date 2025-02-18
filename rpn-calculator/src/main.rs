@@ -1,5 +1,5 @@
 // Library for handling user inputs
-use std::env;
+use std::io;
 
 // Class declaration
 struct RPNCalculator {
@@ -31,14 +31,24 @@ impl RPNCalculator {
         self.latex_stack.pop()
     }
 
+    fn welcome_prompt() {
+        println!("-----------------------------");
+        println!("Welcome to the RPN calculator, please input your equation with 'enter' between!");
+        println!("-----------------------------");
+    }
+
 }
 
 
 // Main function for executing the RPN calculator
 fn main() {
     let mut calc = RPNCalculator::new();
+    RPNCalculator::welcome_prompt();
+    let mut input = String::new();
     // "Main loop", repeating logic for each input
     loop {
+        io::stdin().read_line(&mut input).unwrap();
+        let input = input.trim();
     }
 
 }
