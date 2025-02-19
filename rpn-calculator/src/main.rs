@@ -56,7 +56,6 @@ impl RPNCalculator {
             _ => unreachable!(),
         };
 
-        // First rotation
             self.stack_history = format!("({}) {} {}", self.stack_history, token, b);
             match token {
                 "+" => {
@@ -138,46 +137,45 @@ impl RPNCalculator {
         let result = (1..=a as u64).product::<u64>() as f64;
 
         self.stack_history = format!("{{{}}}!", self.stack_history);
-        self.stack_history = format!("{{{}}}!", self.latex_stack_history);
+        self.latex_stack_history = format!("{{{}}}!", self.latex_stack_history);
 
         self.stack.push(result);
     }
 
     fn full_stack_addition_handling(&mut self) {
         let result: f64 = self.stack.iter().sum();
-        let threshold: usize = self.stack.len();
-        let mut counter = 1;
-
-        for num in self.stack.clone() {
-            if counter < threshold {
+    
+        // Save the first number separately
+        if let Some(&first) = self.stack.first() {
+            self.latex_stack_history = format!("{}", first);
+            self.stack_history = format!("{}", first);
+            
+            // Start from the second number
+            for &num in self.stack.iter().skip(1) {
                 self.latex_stack_history = format!(r"{{{}}} + {}", self.latex_stack_history, num);
                 self.stack_history = format!("({}) + {}", self.stack_history, num);
-            } else {
-
             }
-            counter+=1;
         }
-
+    
         self.stack.clear();
         self.stack.push(result);
     }
-
+    
     fn full_stack_multiplication_handling(&mut self) {
         let result: f64 = self.stack.iter().product();
-        let threshold: usize = self.stack.len();
-        let mut counter = 1;
-
-        for num in self.stack.clone() {
-            // Debugging println!("{:?}", &self.stack);
-            if counter < threshold {
-                self.latex_stack_history = format!(r"{{{}}} /cdot {}", self.latex_stack_history, num);
+    
+        // Save the first number separately
+        if let Some(&first) = self.stack.first() {
+            self.latex_stack_history = format!("{}", first);
+            self.stack_history = format!("{}", first);
+            
+            // Start from the second number
+            for &num in self.stack.iter().skip(1) {
+                self.latex_stack_history = format!(r"{{{}}} \cdot {}", self.latex_stack_history, num);
                 self.stack_history = format!("({}) * {}", self.stack_history, num);
-            } else {
-
             }
-            counter+=1;
         }
-
+    
         self.stack.clear();
         self.stack.push(result);
     }
