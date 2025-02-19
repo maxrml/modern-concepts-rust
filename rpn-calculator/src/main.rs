@@ -186,6 +186,7 @@ impl RPNCalculator {
             if self.indicator{
                 self.stack_history = format!("{}", num);
                 self.latex_stack_history = format!("{}", num);
+                self.indicator = false;
             }
         }
     }
