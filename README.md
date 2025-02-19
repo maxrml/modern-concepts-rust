@@ -64,46 +64,28 @@ This document provides an overview of the RPN (Reverse Polish Notation) calculat
 
 ## Function Interaction Diagram
 
-```mermaid\sequenceDiagram
-    participant User
-    participant main()
-    participant apply_operation()
-    participant arithmetical_operation_handling()
-    participant log_abs_sqrt_operation_handling()
-    participant factorial_operation_handling()
-    participant full_stack_addition_handling()
-    participant full_stack_multiplication_handling()
-    participant new_number_handling()
-    participant get_result()
-
-    User ->> main(): Inputs number/operator
-    main() ->> apply_operation(): Process input
+```mermaid
+flowchart TD
+    A[User Input] -->|Number/Operator| B[Process Input]
     
-    apply_operation() -->> new_number_handling(): If number
-    new_number_handling() ->> apply_operation(): Push to stack
+    B -->|If number| C[Push to Stack]
+    B -->|If operator| D[Handle Operation]
     
-    apply_operation() -->> arithmetical_operation_handling(): If `+`, `-`, `*`, `/`, `^`
-    arithmetical_operation_handling() ->> get_result(): Compute result
-    arithmetical_operation_handling() ->> apply_operation(): Update history & stack
+    D -->|+, -, *, /| E[Arithmetic Operation]
+    D -->|sqrt, log, abs| F[Special Function]
+    D -->|!| G[Factorial]
+    D -->|++| H[Full Stack Addition]
+    D -->|**| I[Full Stack Multiplication]
     
-    apply_operation() -->> log_abs_sqrt_operation_handling(): If `sqrt`, `log`, `abs`
-    log_abs_sqrt_operation_handling() ->> get_result(): Compute result
-    log_abs_sqrt_operation_handling() ->> apply_operation(): Update history & stack
+    E --> J[Compute Result]
+    F --> J
+    G --> J
+    H --> J
+    I --> J
     
-    apply_operation() -->> factorial_operation_handling(): If `!`
-    factorial_operation_handling() ->> get_result(): Compute factorial
-    factorial_operation_handling() ->> apply_operation(): Update history & stack
+    J --> K[Update History & Stack]
+    K --> B
     
-    apply_operation() -->> full_stack_addition_handling(): If `++`
-    full_stack_addition_handling() ->> get_result(): Compute sum
-    full_stack_addition_handling() ->> apply_operation(): Update history & stack
-    
-    apply_operation() -->> full_stack_multiplication_handling(): If `**`
-    full_stack_multiplication_handling() ->> get_result(): Compute product
-    full_stack_multiplication_handling() ->> apply_operation(): Update history & stack
-    
-    User ->> main(): Inputs `exit`
-    main() ->> get_result(): Fetch final result
-    main() ->> User: Display infix, LaTeX, and result
+    A -->|If exit| L[Display Final Result]
 ```
 
