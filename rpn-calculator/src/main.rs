@@ -16,7 +16,7 @@ impl RPNCalculator {
             stack: Vec::new(),
             latex_stack_history: String::new(),
             stack_history: String::new(),
-            indicator: true
+            indicator: true,
         }
     }
 
@@ -57,32 +57,49 @@ impl RPNCalculator {
         };
 
         // First rotation
-        if self.indicator {
-            self.stack.push(result);
-            
-            self.stack_history = format!("{} {} {}", a, token, b);
-            match token {
-                "+" => self.latex_stack_history = format!("{} {} {}", a, token, b),
-                "-" => self.latex_stack_history = format!("({} {} {}", a, token, b),
-                "*" => self.latex_stack_history = format!(r"{} \cdot {}", a, b),
-                "/" => self.latex_stack_history = format!(r"(\frac {{{}}} {{{}}}", a, b),
-                "^" => self.latex_stack_history = format!("r{}^{{{}}}", a, b),
-                _ => panic!()
-            }
-            self.indicator = false;
-
-        } else {
             self.stack_history = format!("({}) {} {}", self.stack_history, token, b);
             match token {
-                "+" => self.latex_stack_history = format!("{{{}}} {} {}", self.latex_stack_history, token, b),
-                "-" => self.latex_stack_history = format!("{{{}}} {} {}", self.latex_stack_history, token, b),
-                "*" => self.latex_stack_history = format!(r"{{{}}} \cdot {}", self.latex_stack_history, b),
-                "/" => self.latex_stack_history = format!(r"\frac {{{}}} {{{}}}", self.latex_stack_history, b),
-                "^" => self.latex_stack_history = format!("r{{{}}}^{{{}}}", self.latex_stack_history, b),
-                _ => panic!()
+                "+" => {
+                    self.latex_stack_history = format!(
+                        "{{{}}} {} {}",
+                        self.latex_stack_history,
+                        token,
+                        b
+                    );
+                }
+                "-" => {
+                    self.latex_stack_history = format!(
+                        "{{{}}} {} {}",
+                        self.latex_stack_history,
+                        token,
+                        b
+                    );
+                }
+                "*" => {
+                    self.latex_stack_history = format!(
+                        r"{{{}}} \cdot {}",
+                        self.latex_stack_history,
+                        b
+                    );
+                }
+                "/" => {
+                    self.latex_stack_history = format!(
+                        r"\frac {{{}}} {{{}}}",
+                        self.latex_stack_history,
+                        b
+                    );
+                }
+                "^" => {
+                    self.latex_stack_history = format!(
+                        r"{{{}}}^{{{}}}",
+                        self.latex_stack_history,
+                        b
+                    );
+                }
+                _ => panic!(),
             }
             self.stack.push(result);
-        }
+        
     }
 
     fn log_abs_sqrt_operation_handling(&mut self, token: &str) {
@@ -97,17 +114,20 @@ impl RPNCalculator {
         match token {
             "sqrt" => {
                 self.stack_history = format!(r"(sqrt({}))", self.stack_history);
-                self.latex_stack_history = format!(r"\sqrt{}", self.latex_stack_history);
-            },
+                self.latex_stack_history = format!(r"\sqrt{{{}}}", self.latex_stack_history);
+            }
             "log" => {
                 self.stack_history = format!(r"(log({}))", self.stack_history);
-                self.latex_stack_history = format!(r"\log_{{10}} {}", self.latex_stack_history);
+                self.latex_stack_history = format!(r"\log_{{10}} {{{}}}", self.latex_stack_history);
             }
             "abs" => {
                 self.stack_history = format!("|{}|", self.stack_history);
-                self.latex_stack_history = format!(r"\left| {} \right|", self.latex_stack_history)
-            },
-            _ => panic!()
+                self.latex_stack_history = format!(
+                    r"\left| {{{}}} \right|",
+                    self.latex_stack_history
+                );
+            }
+            _ => panic!(),
         }
 
         self.stack.push(result);
@@ -117,18 +137,25 @@ impl RPNCalculator {
         let a = self.stack.pop().unwrap();
         let result = (1..=a as u64).product::<u64>() as f64;
 
-        self.stack_history = format!("{}!", self.stack_history);
-        self.stack_history = format!("{}!", self.latex_stack_history);
+        self.stack_history = format!("{{{}}}!", self.stack_history);
+        self.stack_history = format!("{{{}}}!", self.latex_stack_history);
 
         self.stack.push(result);
     }
 
     fn full_stack_addition_handling(&mut self) {
         let result: f64 = self.stack.iter().sum();
+        let threshold: usize = self.stack.len();
+        let mut counter = 1;
 
-        for num in &self.stack {
-            self.latex_stack_history = format!(r"{{{}}} + {}", self.latex_stack_history, num);
-            self.stack_history = format!("({}) + {}", self.stack_history, num);
+        for num in self.stack.clone() {
+            if counter < threshold {
+                self.latex_stack_history = format!(r"{{{}}} + {}", self.latex_stack_history, num);
+                self.stack_history = format!("({}) + {}", self.stack_history, num);
+            } else {
+
+            }
+            counter+=1;
         }
 
         self.stack.clear();
@@ -137,10 +164,18 @@ impl RPNCalculator {
 
     fn full_stack_multiplication_handling(&mut self) {
         let result: f64 = self.stack.iter().product();
+        let threshold: usize = self.stack.len();
+        let mut counter = 1;
 
-        for num in &self.stack {
-            self.latex_stack_history = format!(r"{{{}}} /cdot {}", self.latex_stack_history, num);
-            self.stack_history = format!("({}) * {}", self.stack_history, num);
+        for num in self.stack.clone() {
+            // Debugging println!("{:?}", &self.stack);
+            if counter < threshold {
+                self.latex_stack_history = format!(r"{{{}}} /cdot {}", self.latex_stack_history, num);
+                self.stack_history = format!("({}) * {}", self.stack_history, num);
+            } else {
+
+            }
+            counter+=1;
         }
 
         self.stack.clear();
@@ -150,6 +185,10 @@ impl RPNCalculator {
     fn new_number_handling(&mut self, token: &str) {
         if let Ok(num) = token.parse::<f64>() {
             self.stack.push(num);
+            if self.indicator{
+                self.stack_history = format!("{}", num);
+                self.latex_stack_history = format!("{}", num);
+            }
         }
     }
 
@@ -170,17 +209,17 @@ fn main() {
     let mut calc = RPNCalculator::new();
     RPNCalculator::welcome_prompt();
     let mut input = String::new();
-    
+
     // "Main loop", repeating logic for each input
     loop {
         input.clear();
         io::stdin().read_line(&mut input).unwrap();
         let input = input.trim();
-        
+
         if input.eq_ignore_ascii_case("exit") {
             println!("Exiting RPN Calculator...");
-            println!("Your infix calculation is: {} =", calc.stack_history);
-            println!("Your LaTeX calculation is: {} =", calc.latex_stack_history);
+            println!("Your infix calculation is: {}", calc.stack_history);
+            println!("Your LaTeX calculation is: {}", calc.latex_stack_history);
 
             match calc.get_result() {
                 Some(value) => println!("The final result is: {}", value),
@@ -190,7 +229,7 @@ fn main() {
         }
 
         calc.apply_operation(input);
-        
+
         match input {
             "+" | "-" | "*" | "/" | "^" | "sqrt" | "log" | "abs" | "++" | "**" | "!" => {
                 if let Some(value) = calc.get_result() {
