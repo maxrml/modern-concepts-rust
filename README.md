@@ -119,5 +119,3 @@ Your LaTeX calculation is: {{1} + 2} \cdot 3
 The final result is: 9
 ```
 
-This documentation provides a structured overview of the calculator's functionality, helping developers and users understand its implementation and interaction flow.
-
