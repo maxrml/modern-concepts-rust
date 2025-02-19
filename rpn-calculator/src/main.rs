@@ -4,8 +4,9 @@ use std::io;
 // Class declaration
 struct RPNCalculator {
     stack: Vec<f64>,
-    latex_stack_history: Vec<String>,
-    stack_history: Vec<String>
+    latex_stack_history: String,
+    stack_history: String,
+    indicator: bool,
 }
 
 impl RPNCalculator {
@@ -13,12 +14,13 @@ impl RPNCalculator {
     fn new() -> Self {
         Self {
             stack: Vec::new(),
-            latex_stack_history: Vec::new(),
-            stack_history: Vec::new(),
+            latex_stack_history: String::new(),
+            stack_history: String::new(),
+            indicator: true
         }
     }
 
-    // Applying operation the the stack
+    // Applying operation to the stack
     fn apply_operation(&mut self, token: &str) {
         match token {
             "+" | "-" | "*" | "/" | "^" => {
@@ -45,71 +47,104 @@ impl RPNCalculator {
     fn arithmetical_operation_handling(&mut self, token: &str) {
         let b = self.stack.pop().unwrap();
         let a = self.stack.pop().unwrap();
-                let result = match token {
-                    "+" => a + b,
-                    "-" => a - b,
-                    "*" => a * b,
-                    "/" => a / b,
-                    "^" => a.powf(b),
-                    _ => unreachable!(),
-                };
+        let result = match token {
+            "+" => a + b,
+            "-" => a - b,
+            "*" => a * b,
+            "/" => a / b,
+            "^" => a.powf(b),
+            _ => unreachable!(),
+        };
 
-                let infix = format!("({} {} {})", a, token, b);
-                let latex = format!("({} {} {})", a, token, b);
+        // First rotation
+        if self.indicator {
+            self.stack.push(result);
+            
+            self.stack_history = format!("{} {} {}", a, token, b);
+            match token {
+                "+" => self.latex_stack_history = format!("{} {} {}", a, token, b),
+                "-" => self.latex_stack_history = format!("({} {} {}", a, token, b),
+                "*" => self.latex_stack_history = format!(r"{} \cdot {}", a, b),
+                "/" => self.latex_stack_history = format!(r"(\frac {{{}}} {{{}}}", a, b),
+                "^" => self.latex_stack_history = format!("r{}^{{{}}}", a, b),
+                _ => panic!()
+            }
+            self.indicator = false;
 
-                self.stack.push(result);
-                self.stack_history.push(infix);
-                self.latex_stack_history.push(latex);
+        } else {
+            self.stack_history = format!("({}) {} {}", self.stack_history, token, b);
+            match token {
+                "+" => self.latex_stack_history = format!("{{{}}} {} {}", self.latex_stack_history, token, b),
+                "-" => self.latex_stack_history = format!("{{{}}} {} {}", self.latex_stack_history, token, b),
+                "*" => self.latex_stack_history = format!(r"{{{}}} \cdot {}", self.latex_stack_history, b),
+                "/" => self.latex_stack_history = format!(r"\frac {{{}}} {{{}}}", self.latex_stack_history, b),
+                "^" => self.latex_stack_history = format!("r{{{}}}^{{{}}}", self.latex_stack_history, b),
+                _ => panic!()
+            }
+            self.stack.push(result);
+        }
     }
 
     fn log_abs_sqrt_operation_handling(&mut self, token: &str) {
         let a = self.stack.pop().unwrap();
-                let result = match token {
-                    "sqrt" => a.sqrt(),
-                    "log" => a.log10(),
-                    "abs" => a.abs(),
-                    _ => unreachable!(),
-                };
+        let result = match token {
+            "sqrt" => a.sqrt(),
+            "log" => a.log10(),
+            "abs" => a.abs(),
+            _ => unreachable!(),
+        };
 
-                let infix = format!("{}({})", token, a);
-                let latex = match token {
-                    "sqrt" => format!(r"\sqrt{{{}}}", a),
-                    "log" => format!(r"\log_{{10}}({})", a),
-                    "abs" => format!(r"\left| {} \right|", a),
-                    _ => unreachable!(),
-                };
+        match token {
+            "sqrt" => {
+                self.stack_history = format!(r"(sqrt({}))", self.stack_history);
+                self.latex_stack_history = format!(r"\sqrt{}", self.latex_stack_history);
+            },
+            "log" => {
+                self.stack_history = format!(r"(log({}))", self.stack_history);
+                self.latex_stack_history = format!(r"\log_{{10}} {}", self.latex_stack_history);
+            }
+            "abs" => {
+                self.stack_history = format!("|{}|", self.stack_history);
+                self.latex_stack_history = format!(r"\left| {} \right|", self.latex_stack_history)
+            },
+            _ => panic!()
+        }
 
-                self.stack.push(result);
-                self.stack_history.push(infix);
-                self.latex_stack_history.push(latex);
+        self.stack.push(result);
     }
 
     fn factorial_operation_handling(&mut self) {
         let a = self.stack.pop().unwrap();
-                let result = (1..=a as u64).product::<u64>() as f64;
+        let result = (1..=a as u64).product::<u64>() as f64;
 
-                let infix = format!("({}!)", a);
-                let latex = format!(r"{}!", a);
+        self.stack_history = format!("{}!", self.stack_history);
+        self.stack_history = format!("{}!", self.latex_stack_history);
 
-                self.stack.push(result);
-                self.stack_history.push(infix);
-                self.latex_stack_history.push(latex);
+        self.stack.push(result);
     }
 
     fn full_stack_addition_handling(&mut self) {
         let result: f64 = self.stack.iter().sum();
-                self.stack.clear();
-                self.stack.push(result);
-                self.stack_history.push(format!("sum({:?})", self.stack));
-                self.latex_stack_history.push(format!(r"\sum {}", result));
+
+        for num in &self.stack {
+            self.latex_stack_history = format!(r"{{{}}} + {}", self.latex_stack_history, num);
+            self.stack_history = format!("({}) + {}", self.stack_history, num);
+        }
+
+        self.stack.clear();
+        self.stack.push(result);
     }
 
     fn full_stack_multiplication_handling(&mut self) {
         let result: f64 = self.stack.iter().product();
-                self.stack.clear();
-                self.stack.push(result);
-                self.stack_history.push(format!("prod({:?})", self.stack));
-                self.latex_stack_history.push(format!(r"\prod {}", result));
+
+        for num in &self.stack {
+            self.latex_stack_history = format!(r"{{{}}} /cdot {}", self.latex_stack_history, num);
+            self.stack_history = format!("({}) * {}", self.stack_history, num);
+        }
+
+        self.stack.clear();
+        self.stack.push(result);
     }
 
     fn new_number_handling(&mut self, token: &str) {
@@ -128,52 +163,41 @@ impl RPNCalculator {
     fn get_result(&self) -> Option<f64> {
         self.stack.last().cloned()
     }
-
 }
-
 
 // Main function for executing the RPN calculator
 fn main() {
     let mut calc = RPNCalculator::new();
     RPNCalculator::welcome_prompt();
     let mut input = String::new();
+    
     // "Main loop", repeating logic for each input
     loop {
         input.clear();
         io::stdin().read_line(&mut input).unwrap();
         let input = input.trim();
+        
         if input.eq_ignore_ascii_case("exit") {
             println!("Exiting RPN Calculator...");
-            println!("Your infinix calculation is: {:?}", concatenate_stack_history(&calc.stack_history));
-            println!("Your latex calculation is: {:?}", concatenate_stack_history(&calc.latex_stack_history));
+            println!("Your infix calculation is: {} =", calc.stack_history);
+            println!("Your LaTeX calculation is: {} =", calc.latex_stack_history);
 
-            if let Some(result) = calc.get_result() {
-                println!("The final result is: {}", result);
-            } else {
-                println!("No result available.");
+            match calc.get_result() {
+                Some(value) => println!("The final result is: {}", value),
+                None => println!("No result available."),
             }
-
             break;
         }
+
         calc.apply_operation(input);
+        
         match input {
             "+" | "-" | "*" | "/" | "^" | "sqrt" | "log" | "abs" | "++" | "**" | "!" => {
-                println!("Current result: {:?}", calc.get_result())
+                if let Some(value) = calc.get_result() {
+                    println!("The current result is: {}", value);
+                }
             }
-            _ => {
-
-            }
+            _ => {}
         }
     }
-
-}
-
-fn concatenate_stack_history(history: &Vec<String>) -> String {
-    let mut result = String::new();
-
-    for expression in history {
-        result += expression;
-    }
-
-    result
 }
