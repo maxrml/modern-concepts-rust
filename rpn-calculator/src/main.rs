@@ -37,8 +37,14 @@ impl RPNCalculator {
                 self.full_stack_multiplication_handling();
             }
             _ => {
-                self.new_number_handling(token);
+                match token.parse::<f64>() {
+                    Ok(_) => self.new_number_handling(token),
+                    Err(_) => {
+                        println!("Invalid input '{}'", token);
+                        self.history_stack.pop();
+                    }
             }
+        }
         }
     }
 
