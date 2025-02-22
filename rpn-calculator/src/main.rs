@@ -1,7 +1,7 @@
 // Library for handling user inputs
 use std::io;
 
-// Class declaration
+// Class declaration, clone trait
 #[derive(Clone)]
 struct RPNCalculator {
     stack: Vec<f64>,
@@ -155,10 +155,10 @@ impl RPNCalculator {
                     let operand = self.reconstruct_expression_infix();
                     format!("log10({})", operand)
                 }
-                _ => token, // Falls es eine Zahl ist
+                _ => token, // numbers
             }
         } else {
-            String::new() // Falls der Stack leer ist
+            String::new() // empty stack
         }
     }
 
@@ -168,26 +168,21 @@ impl RPNCalculator {
                 "+" | "-" => {
                     let right = self.reconstruct_expression_latex();
                     let left = self.reconstruct_expression_latex();
-                    // Gesamter Ausdruck in einer Klammerngruppe
                     format!("{{{} {} {}}}", left, token, right)
                 }
                 "*" => {
                     let right = self.reconstruct_expression_latex();
                     let left = self.reconstruct_expression_latex();
-                    // Gruppierung analog zu +, aber mit \cdot
                     format!("{{{} \\cdot {}}}", left, right)
                 }
                 "/" => {
                     let right = self.reconstruct_expression_latex();
                     let left = self.reconstruct_expression_latex();
-                    // \frac benötigt eigene Gruppierung der Zähler und Nenner, aber man kann
-                    // trotzdem die Gesamtdarstellung in eine äußere Klammer einschließen, wenn gewünscht:
                     format!("{{\\frac{{{}}}{{{}}}}}", left, right)
                 }
                 "^" => {
                     let right = self.reconstruct_expression_latex();
                     let left = self.reconstruct_expression_latex();
-                    // Hier wird der Exponent ebenfalls in eigenen Klammern gesetzt
                     format!("{{{}^{{{}}}}}", left, right)
                 }
                 "++" => {
@@ -195,7 +190,6 @@ impl RPNCalculator {
                     while !self.history_stack.is_empty() {
                         terms.push(self.reconstruct_expression_latex());
                     }
-                    // Gesamte Summenrechnung gruppieren
                     format!("{{{}}}", terms.join(" + "))
                 }
                 "**" => {
@@ -203,33 +197,28 @@ impl RPNCalculator {
                     while !self.history_stack.is_empty() {
                         terms.push(self.reconstruct_expression_latex());
                     }
-                    // Gesamte Multiplikation gruppieren
                     format!("{{{}}}", terms.join(" \\cdot "))
                 }
                 "!" => {
                     let operand = self.reconstruct_expression_latex();
-                    // Fakultät: Operand in Klammern, dann !
                     format!("{{{}}}!", operand)
                 }
                 "abs" => {
                     let operand = self.reconstruct_expression_latex();
-                    // Absolutwert mit LaTeX-Syntax
                     format!(r"\left| {{{}}} \right|", operand)
                 }
                 "sqrt" => {
                     let operand = self.reconstruct_expression_latex();
-                    // Quadratwurzel: Ausdruck in Klammern
                     format!(r"\sqrt{{{}}}", operand)
                 }
                 "log" => {
                     let operand = self.reconstruct_expression_latex();
-                    // Logarithmus zur Basis 10
                     format!(r"\log_{{10}} {{{}}}", operand)
                 }
-                _ => token, // Falls es eine Zahl ist
+                _ => token, // numbers
             }
         } else {
-            String::new() // Falls der Stack leer ist
+            String::new() // if the stack is empty
         }
     }
 }
