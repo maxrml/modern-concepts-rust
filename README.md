@@ -30,7 +30,7 @@ The struct derives the `Clone` trait, which enables the entire object to be clon
 
 ```mermaid
 flowchart TD
-    A[User Input] -->|Number/Operator| B[Process Input]
+    A[User Input] -->|Number/Operator/Escape sequence| B[Process Input]
     
     B -->|If number| C[Push to Stack and Stack History]
     C --> A
@@ -48,7 +48,7 @@ flowchart TD
     H --> J
     I --> J
     
-    J --> B
+    J --> A
     
     
     B -->|exit| L[Display Final Result and Expression History Stack]
