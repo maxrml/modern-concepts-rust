@@ -103,7 +103,12 @@ impl RPNCalculator {
     }
 
     fn get_result(&self) -> Option<f64> {
-        self.stack.last().cloned()
+        if self.stack.len() == 1{
+            self.stack.last().cloned()
+        }else{
+            None
+        }
+        
     }
 
     fn reconstruct_expression_infix(&mut self) -> String {
