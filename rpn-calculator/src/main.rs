@@ -2,11 +2,10 @@
 use std::io;
 
 // Class declaration
+#[derive(Clone)]
 struct RPNCalculator {
     stack: Vec<f64>,
-    latex_stack_history: String,
-    stack_history: String,
-    indicator: bool,
+    history_stack: Vec<String>,
 }
 
 impl RPNCalculator {
@@ -14,14 +13,13 @@ impl RPNCalculator {
     fn new() -> Self {
         Self {
             stack: Vec::new(),
-            latex_stack_history: String::new(),
-            stack_history: String::new(),
-            indicator: true,
+            history_stack: Vec::new(),
         }
     }
 
     // Applying operation to the stack
     fn apply_operation(&mut self, token: &str) {
+        self.history_stack.push(token.to_owned());
         match token {
             "+" | "-" | "*" | "/" | "^" => {
                 self.arithmetical_operation_handling(token);
@@ -55,70 +53,17 @@ impl RPNCalculator {
             "^" => a.powf(b),
             _ => unreachable!(),
         };
-
-        self.stack_history = format!("({}) {} {}", self.stack_history, token, b);
-        match token {
-            "+" => {
-                self.latex_stack_history = format!(
-                    "{{{}}} {} {}",
-                    self.latex_stack_history,
-                    token,
-                    b
-                );
-            }
-            "-" => {
-                self.latex_stack_history = format!(
-                    "{{{}}} {} {}",
-                    self.latex_stack_history,
-                    token,
-                    b
-                );
-            }
-            "*" => {
-                self.latex_stack_history = format!(r"{{{}}} \cdot {}", self.latex_stack_history, b);
-            }
-            "/" => {
-                self.latex_stack_history = format!(
-                    r"\frac {{{}}} {{{}}}",
-                    self.latex_stack_history,
-                    b
-                );
-            }
-            "^" => {
-                self.latex_stack_history = format!(r"{{{}}}^{{{}}}", self.latex_stack_history, b);
-            }
-            _ => panic!(),
-        }
         self.stack.push(result);
     }
 
     fn log_abs_sqrt_operation_handling(&mut self, token: &str) {
-        let a = self.stack.pop().unwrap();
+        let a: f64 = self.stack.pop().unwrap();
         let result = match token {
             "sqrt" => a.sqrt(),
             "log" => a.log10(),
             "abs" => a.abs(),
             _ => unreachable!(),
         };
-
-        match token {
-            "sqrt" => {
-                self.stack_history = format!(r"(sqrt({}))", self.stack_history);
-                self.latex_stack_history = format!(r"\sqrt{{{}}}", self.latex_stack_history);
-            }
-            "log" => {
-                self.stack_history = format!(r"(log({}))", self.stack_history);
-                self.latex_stack_history = format!(r"\log_{{10}} {{{}}}", self.latex_stack_history);
-            }
-            "abs" => {
-                self.stack_history = format!("|{}|", self.stack_history);
-                self.latex_stack_history = format!(
-                    r"\left| {{{}}} \right|",
-                    self.latex_stack_history
-                );
-            }
-            _ => panic!(),
-        }
 
         self.stack.push(result);
     }
@@ -127,26 +72,11 @@ impl RPNCalculator {
         let a = self.stack.pop().unwrap();
         let result = (1..=a as u64).product::<u64>() as f64;
 
-        self.stack_history = format!("{{{}}}!", self.stack_history);
-        self.latex_stack_history = format!("{{{}}}!", self.latex_stack_history);
-
         self.stack.push(result);
     }
 
     fn full_stack_addition_handling(&mut self) {
         let result: f64 = self.stack.iter().sum();
-
-        // Save the first number separately
-        if let Some(&first) = self.stack.first() {
-            self.latex_stack_history = format!("{}", first);
-            self.stack_history = format!("{}", first);
-
-            // Start from the second number
-            for &num in self.stack.iter().skip(1) {
-                self.latex_stack_history = format!(r"{{{}}} + {}", self.latex_stack_history, num);
-                self.stack_history = format!("({}) + {}", self.stack_history, num);
-            }
-        }
 
         self.stack.clear();
         self.stack.push(result);
@@ -155,22 +85,6 @@ impl RPNCalculator {
     fn full_stack_multiplication_handling(&mut self) {
         let result: f64 = self.stack.iter().product();
 
-        // Save the first number separately
-        if let Some(&first) = self.stack.first() {
-            self.latex_stack_history = format!("{}", first);
-            self.stack_history = format!("{}", first);
-
-            // Start from the second number
-            for &num in self.stack.iter().skip(1) {
-                self.latex_stack_history = format!(
-                    r"{{{}}} \cdot {}",
-                    self.latex_stack_history,
-                    num
-                );
-                self.stack_history = format!("({}) * {}", self.stack_history, num);
-            }
-        }
-
         self.stack.clear();
         self.stack.push(result);
     }
@@ -178,11 +92,6 @@ impl RPNCalculator {
     fn new_number_handling(&mut self, token: &str) {
         if let Ok(num) = token.parse::<f64>() {
             self.stack.push(num);
-            if self.indicator {
-                self.stack_history = format!("{}", num);
-                self.latex_stack_history = format!("{}", num);
-                self.indicator = false;
-            }
         }
     }
 
@@ -195,6 +104,122 @@ impl RPNCalculator {
 
     fn get_result(&self) -> Option<f64> {
         self.stack.last().cloned()
+    }
+
+    fn reconstruct_expression_infix(&mut self) -> String {
+        if let Some(token) = self.history_stack.pop() {
+            match token.as_str() {
+                "+" | "-" | "*" | "/" | "^" => {
+                    let right = self.reconstruct_expression_infix();
+                    let left = self.reconstruct_expression_infix();
+                    format!("({} {} {})", left, token, right)
+                }
+                "++" => {
+                    let mut terms = Vec::new();
+                    while !self.history_stack.is_empty() {
+                        terms.push(self.reconstruct_expression_infix());
+                    }
+                    format!("({})", terms.join(" + "))
+                }
+                "**" => {
+                    let mut terms = Vec::new();
+                    while !self.history_stack.is_empty() {
+                        terms.push(self.reconstruct_expression_infix());
+                    }
+                    format!("({})", terms.join(" * "))
+                }
+                "!" => {
+                    let operand = self.reconstruct_expression_infix();
+                    format!("({}!)", operand)
+                }
+                "abs" => {
+                    let operand = self.reconstruct_expression_infix();
+                    format!("abs({})", operand)
+                }
+                "sqrt" => {
+                    let operand = self.reconstruct_expression_infix();
+                    format!("sqrt({})", operand)
+                }
+                "log" => {
+                    let operand = self.reconstruct_expression_infix();
+                    format!("log10({})", operand)
+                }
+                _ => token, // Falls es eine Zahl ist
+            }
+        } else {
+            String::new() // Falls der Stack leer ist
+        }
+    }
+
+    fn reconstruct_expression_latex(&mut self) -> String {
+        if let Some(token) = self.history_stack.pop() {
+            match token.as_str() {
+                "+" | "-" => {
+                    let right = self.reconstruct_expression_latex();
+                    let left = self.reconstruct_expression_latex();
+                    // Gesamter Ausdruck in einer Klammerngruppe
+                    format!("{{{} {} {}}}", left, token, right)
+                }
+                "*" => {
+                    let right = self.reconstruct_expression_latex();
+                    let left = self.reconstruct_expression_latex();
+                    // Gruppierung analog zu +, aber mit \cdot
+                    format!("{{{} \\cdot {}}}", left, right)
+                }
+                "/" => {
+                    let right = self.reconstruct_expression_latex();
+                    let left = self.reconstruct_expression_latex();
+                    // \frac benötigt eigene Gruppierung der Zähler und Nenner, aber man kann
+                    // trotzdem die Gesamtdarstellung in eine äußere Klammer einschließen, wenn gewünscht:
+                    format!("{{\\frac{{{}}}{{{}}}}}", left, right)
+                }
+                "^" => {
+                    let right = self.reconstruct_expression_latex();
+                    let left = self.reconstruct_expression_latex();
+                    // Hier wird der Exponent ebenfalls in eigenen Klammern gesetzt
+                    format!("{{{}^{{{}}}}}", left, right)
+                }
+                "++" => {
+                    let mut terms = Vec::new();
+                    while !self.history_stack.is_empty() {
+                        terms.push(self.reconstruct_expression_latex());
+                    }
+                    // Gesamte Summenrechnung gruppieren
+                    format!("{{{}}}", terms.join(" + "))
+                }
+                "**" => {
+                    let mut terms = Vec::new();
+                    while !self.history_stack.is_empty() {
+                        terms.push(self.reconstruct_expression_latex());
+                    }
+                    // Gesamte Multiplikation gruppieren
+                    format!("{{{}}}", terms.join(" \\cdot "))
+                }
+                "!" => {
+                    let operand = self.reconstruct_expression_latex();
+                    // Fakultät: Operand in Klammern, dann !
+                    format!("{{{}}}!", operand)
+                }
+                "abs" => {
+                    let operand = self.reconstruct_expression_latex();
+                    // Absolutwert mit LaTeX-Syntax
+                    format!(r"\left| {{{}}} \right|", operand)
+                }
+                "sqrt" => {
+                    let operand = self.reconstruct_expression_latex();
+                    // Quadratwurzel: Ausdruck in Klammern
+                    format!(r"\sqrt{{{}}}", operand)
+                }
+                "log" => {
+                    let operand = self.reconstruct_expression_latex();
+                    // Logarithmus zur Basis 10
+                    format!(r"\log_{{10}} {{{}}}", operand)
+                }
+                _ => token, // Falls es eine Zahl ist
+            }
+        } else {
+            String::new() // Falls der Stack leer ist
+        }
     }
 }
 
@@ -212,8 +237,8 @@ fn main() {
 
         if input.eq_ignore_ascii_case("exit") {
             println!("Exiting RPN Calculator...");
-            println!("Your infix calculation is: {}", calc.stack_history);
-            println!("Your LaTeX calculation is: {}", calc.latex_stack_history);
+            println!("Your infix calculation is: {}", calc.clone().reconstruct_expression_infix());
+            println!("Your LaTeX calculation is: {}", calc.clone().reconstruct_expression_latex());
 
             match calc.get_result() {
                 Some(value) => println!("The final result is: {}", value),
