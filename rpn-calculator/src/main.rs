@@ -233,7 +233,7 @@ fn main() {
     loop {
         input.clear();
         io::stdin().read_line(&mut input).unwrap();
-        let input = input.trim();
+        let input: &str = input.trim();
 
         if input.eq_ignore_ascii_case("exit") {
             println!("Exiting RPN Calculator...");
