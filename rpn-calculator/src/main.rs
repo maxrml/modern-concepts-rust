@@ -43,8 +43,8 @@ impl RPNCalculator {
                         println!("Invalid input '{}'", token);
                         self.history_stack.pop();
                     }
+                }
             }
-        }
         }
     }
 
@@ -79,7 +79,7 @@ impl RPNCalculator {
         if a.fract() == 0.0 {
             let result = (1..=a as u64).product::<u64>() as f64;
             self.stack.push(result);
-        }else{
+        } else {
             println!("Invalid input '{}', cannot calculate the factorial", a);
             self.history_stack.pop();
         }
@@ -113,12 +113,7 @@ impl RPNCalculator {
     }
 
     fn get_result(&self) -> Option<f64> {
-        if self.stack.len() == 1{
-            self.stack.last().cloned()
-        }else{
-            None
-        }
-        
+        if self.stack.len() == 1 { self.stack.last().cloned() } else { None }
     }
 
     fn reconstruct_expression_infix(&mut self) -> String {
