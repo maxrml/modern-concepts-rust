@@ -76,9 +76,13 @@ impl RPNCalculator {
 
     fn factorial_operation_handling(&mut self) {
         let a = self.stack.pop().unwrap();
-        let result = (1..=a as u64).product::<u64>() as f64;
-
-        self.stack.push(result);
+        if a.fract() == 0.0 {
+            let result = (1..=a as u64).product::<u64>() as f64;
+            self.stack.push(result);
+        }else{
+            println!("Invalid input '{}', cannot calculate the factorial", a);
+            self.history_stack.pop();
+        }
     }
 
     fn full_stack_addition_handling(&mut self) {
