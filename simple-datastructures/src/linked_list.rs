@@ -1,18 +1,18 @@
 use crate::datastructure::List;
-pub struct Queue<T> {
+pub struct LinkedList<T> {
     list: List<T>,
 }
 
-impl<T> Queue<T> {
+impl<T> LinkedList<T> {
     // Konstruktor für eine leere LinkedList
     pub fn new() -> Self {
-        Queue {
+        LinkedList {
             list: List::new(),
         }
     }
 
     // `equals` ruft die `equals`-Methode der inneren `List` auf
-    pub fn equals(&self, other: &Queue<T>) -> bool
+    pub fn equals(&self, other: &LinkedList<T>) -> bool
     where
         T: PartialEq,
     {
