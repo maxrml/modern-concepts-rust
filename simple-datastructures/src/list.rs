@@ -1,154 +1,86 @@
-
-#[derive(Debug)]
-struct Node<T> {
-    value: T,
-    next: Option<Box<Node<T>>>,
-}
-
-#[derive(Debug)]
+use crate::stack::Stack;
+use crate::stack::Node;
+#[derive(Clone)]
 pub struct LinkedList<T> {
-    head: Option<Box<Node<T>>>,
-    len: usize,
+    stack: Stack<T>,    // Wir nutzen den Stack als Baustein
+    tail: Option<Box<Node<T>>>,  // Der `tail`-Zeiger auf das letzte Element
 }
 
-#[derive(Debug)]
-pub enum LinkedListError {
-    IndexOutOfBounds,
-    ElementNotFound,
-    EmptyList,
-}
-
-impl<T: PartialEq> LinkedList<T> {
+impl<T> LinkedList<T>
+where T: Clone,
+{
     pub fn new() -> Self {
-        LinkedList { head: None, len: 0 }
+        LinkedList {
+            stack: Stack::new(), // Der Stack wird hier als Baustein verwendet
+            tail: None,          // Anfangs gibt es keinen Tail
+        }
     }
 
-    //get(pos): Gibt das Element an der gegebenen Position zurück.
-    pub fn get(&self, pos: usize) -> Result<&T, LinkedListError> {
-        if pos >= self.len {
-            return Err(LinkedListError::IndexOutOfBounds);
+    // Fügt ein Element am Anfang der Liste hinzu
+    pub fn push_front(&mut self, data: T) {
+        self.stack.push(data);
+
+        // Wenn die Liste leer war, ist das neue Element sowohl `head` als auch `tail`
+        if self.tail.is_none() {
+            if let Some(ref mut head) = self.stack.head {
+                self.tail = Some(head.clone());
+            }
         }
-        let mut current = &self.head;
-        for _ in 0..pos {
-            current = &current.as_ref().unwrap().next;
-        }
-        Ok(&current.as_ref().unwrap().value)
     }
 
-    // add(elems): Fügt alle Elemente der Liste hinzu.
-    pub fn add(&mut self, elems: Vec<T>) -> Result<(), LinkedListError> {
-        for elem in elems {
-            self.insert(elem, self.len)?;
-        }
-        Ok(())
-    }
+    // Fügt ein Element am Ende der Liste hinzu
+    pub fn push_back(&mut self, data: T) {
+        let new_node = Box::new(Node {
+            data: data.clone(),
+            next: None,
+        });
 
-    // insert(elem, pos): Einfügen eines Elements an der gegeben Position.
-    pub fn insert(&mut self, elem: T, pos: usize) -> Result<(), LinkedListError> {
-        if pos > self.len {
-            return Err(LinkedListError::IndexOutOfBounds);
-        }
-
-        let new_node = Box::new(Node { value: elem, next: None });
-        if pos == 0 {
-            let mut new_node = new_node;
-            new_node.next = self.head.take();
-            self.head = Some(new_node);
+        // Wenn die Liste leer ist, setzen wir das neue Element als `head` und `tail`
+        if self.stack.is_empty() {
+            self.stack.push(data); // Ein Element als `head`
+            self.tail = Some(new_node); // Setzen des `tail`
         } else {
-            let mut current = &mut self.head;
-            for _ in 0..pos - 1 {
-                current = &mut current.as_mut().unwrap().next;
+            // Andernfalls fügen wir das neue Element hinter dem aktuellen `tail` hinzu
+            if let Some(ref mut tail) = self.tail {
+                tail.next = Some(new_node.clone());
             }
-            let mut new_node = new_node;
-            new_node.next = current.as_mut().unwrap().next.take();
-            current.as_mut().unwrap().next = Some(new_node);
+            self.tail = Some(new_node); // Das neue Element wird zum `tail`
         }
-        self.len += 1;
-        Ok(())
     }
 
-    // remove(elem): Entfernt das erste Vorkommen des Elements aus einer nicht leeren Liste.
-    pub fn remove(&mut self, elem: T) -> Result<(), LinkedListError> {
-        if self.is_empty() {
-            return Err(LinkedListError::EmptyList);
-        }
-
-        let mut current = &mut self.head;
-        while let Some(ref mut node) = current {
-            if node.value == elem {
-                current = node.next.take();
-                self.len -= 1;
-                return Ok(());
-            }
-            current = &mut node.next;
-        }
-        Err(LinkedListError::ElementNotFound)
-    }
-
-    // removeAt(pos): Entfernt das Element an der gegebenen Position.
-    pub fn remove_at(&mut self, pos: usize) -> Result<(), LinkedListError> {
+    // Entfernt das erste Element der Liste
+    pub fn pop_front(&mut self) -> Option<T> {
+        let popped = self.stack.pop();
         
-        if pos >= self.len {
-            return Err(LinkedListError::IndexOutOfBounds);
+        // Wenn die Liste jetzt leer ist, setzen wir `tail` auf `None`
+        if self.stack.is_empty() {
+            self.tail = None;
         }
-        if pos == 0 {
-            self.head = self.head.take().and_then(|node| node.next);
-        } else {
-            let mut current = &mut self.head;
-            for _ in 0..pos - 1 {
-                current = &mut current.as_mut().unwrap().next;
-            }
-            let next = current.as_mut().unwrap().next.take().and_then(|node| node.next);
-            current.as_mut().unwrap().next = next;
-        }
-        self.len -= 1;
-        Ok(())
-    }
-    
-
-    // replace(elem, pos): Ersetzt ein Element an der gegeben Position durch das neue Element.
-    pub fn replace(&mut self, elem: T, pos: usize) -> Result<(), LinkedListError> {
-        if pos >= self.len {
-            return Err(LinkedListError::IndexOutOfBounds);
-        }
-
-        let mut current = &mut self.head;
-        for _ in 0..pos {
-            current = &mut current.as_mut().unwrap().next;
-        }
-        if let Some(ref mut node) = current {
-            node.value = elem;
-        }
-        Ok(())
+        
+        popped
     }
 
-    // size(): Gibt die Anzahl der Elemente in der Liste zurück.
-    pub fn size(&self) -> usize {
-        self.len
+    // Gibt die Größe der Liste zurück
+    pub fn size(&self) -> i32 {
+        self.stack.size()
     }
 
-    // isEmpty(): true wenn die Liste leer ist sonst false
+    // Überprüft, ob die Liste leer ist
     pub fn is_empty(&self) -> bool {
-        self.len == 0
+        self.stack.is_empty()
     }
 
-    // isFull(): false wenn die Liste leer ist sonst true
-    pub fn is_full(&self) -> bool {
-        !self.is_empty()
+    // Gibt die Liste als String zurück
+    pub fn to_string(&self) -> String
+    where
+        T: ToString,
+    {
+        self.stack.to_string()
+    }
+
+    // Gibt das letzte Element der Liste zurück
+    pub fn peek_tail(&self) -> Option<&T> {
+        self.tail.as_ref().map(|node| &node.data)
     }
 }
-/*
-get(pos): Gibt das Element an der gegebenen Position zurück.
-add(elems): Fügt alle Elemente der Liste hinzu.
-insert(elem, pos): Einfügen eines Elements an der gegeben Position.
-remove(elem): Entfernt das erste Vorkommen des Elements aus einer nicht leeren Liste.
-removeAt(pos): Entfernt das Element an der gegebenen Position.
-replace(elem, pos): Ersetzt ein Element an der gegeben Position durch das neue Element.
-size(): Gibt die Anzahl der Elemente in der Liste zurück.
-isEmpty(): true wenn die Liste leer ist sonst false
-isFull(): false wenn die Liste leer ist sonst true
-*/
-
-
-
 

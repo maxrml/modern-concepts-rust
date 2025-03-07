@@ -1,74 +1,96 @@
 mod stack;  // Modul deklarieren 
-use stack::Stack; // die Struktur aus Modul importieren
+use stack::Stack;
+mod queue;
+use queue::Queue;
+mod list;
+use list::LinkedList;
 
-mod list;  // Modul deklarieren 
-use list::LinkedList; // die Struktur aus Modul importieren
 
 fn main() {
-
-    // **********STACK**********
-
-
-    let mut stack = Stack::new();
+    // Demonstration der Stack-Klasse
+    println!("--- Stack Demo ---");
+    let mut stack: Stack<i32> = Stack::new();
     
-    stack.push(1);
-    stack.push(2);
-    stack.push(3);
-    stack.push_all(vec![2, 3, 4, 5]);
-
-    println!("Top of stack: {:?}", stack.peek());
-    println!("Stack full: {}", stack.is_full());
+    // Push-Operationen
+    stack.push(10);
+    stack.push(20);
+    stack.push(30);
     
+    // Ausgabe des Stacks
+    println!("Stack: {}", stack.to_string());
     
-
-    while !stack.is_empty() {  
-        stack.peek();
-        println!("Popped: {:?}", stack.pop());
+    // Pop-Operation
+    if let Some(val) = stack.pop() {
+        println!("Pop: {}", val);
     }
-
-    match stack.pop() {
-        Ok(value) => println!("Popped value: {}", value),
-        Err(e) => println!("Error: {:?}", e),
-    }
-
     
-    // **********LINKED LIST**********
+    // Stack nach Pop
+    println!("Stack nach Pop: {}", stack.to_string());
+    
+    // Stack-Methoden
+    println!("Stack Größe: {}", stack.size());
+    println!("Ist der Stack leer? {}", stack.is_empty());
 
+    // Erstellen eines weiteren Stacks und vergleichen
+    let mut another_stack = Stack::new();
+    another_stack.push(20);
+    another_stack.push(10);
+    
+    println!("Sind die beiden Stacks gleich? {}", stack.equals(&another_stack));
 
+    let mut queue = Queue::new();
+    queue.enqueue(1);
+    queue.enqueue(2);
+    queue.enqueue(3);
+    
+    println!("Queue: {}", queue.to_string()); // Output: 1 -> 2 -> 3
 
+    println!("Dequeue: {:?}", queue.dequeue()); // Output: Some(1)
+    println!("Queue: {}", queue.to_string()); // Output: 2 -> 3
+
+    queue.enqueue(4);
+    println!("Queue: {}", queue.to_string()); // Output: 2 -> 3 -> 4
+    
     let mut list = LinkedList::new();
 
-    
-    match list.add(vec![1, 2, 3]) {
-        Ok(_) => println!("Elements added."),
-        Err(e) => println!("Error adding elements: {:?}", e),
-    }
+    // Füge einige Elemente hinzu
+    println!("Füge 10 hinzu:");
+    list.push_back(10);
+    println!("{}", list.to_string());  // Erwartete Ausgabe: 10
 
-    match list.insert(10, 1) {
-        Ok(_) => println!("{:?}, size: {}", list, list.size()),
-        Err(e) => println!("Error inserting element: {:?}", e),
+    println!("Füge 20 hinzu:");
+    list.push_back(20);
+    println!("{}", list.to_string());  // Erwartete Ausgabe: 10 -> 20
+
+    println!("Füge 30 hinzu:");
+    list.push_back(30);
+    println!("{}", list.to_string());  // Erwartete Ausgabe: 10 -> 20 -> 30
+
+    // Füge ein Element vorne hinzu
+    println!("Füge 5 vorne hinzu:");
+    list.push_front(5);
+    println!("{}", list.to_string());  // Erwartete Ausgabe: 5 -> 10 -> 20 -> 30
+
+    // Poppe das erste Element (vorne)
+    println!("Poppe das erste Element (vorne):");
+    list.pop_front();
+    println!("{}", list.to_string());  // Erwartete Ausgabe: 10 -> 20 -> 30
+
+    // Zeige das letzte Element (tail)
+    println!("Das letzte Element ist: {:?}", list.peek_tail());  // Erwartete Ausgabe: Some(30)
+
+    // Teste die Größe der Liste
+    println!("Die Größe der Liste ist: {}", list.size());  // Erwartete Ausgabe: 3
+
+    // Überprüfe, ob die Liste leer ist
+    println!("Ist die Liste leer? {}", list.is_empty());  // Erwartete Ausgabe: false
+
+    // Entferne alle Elemente
+    println!("Poppe alle Elemente:");
+    while let Some(item) = list.pop_front() {
+        println!("Entferntes Element: {}", item);
     }
+    println!("Ist die Liste leer? {}", list.is_empty());  
+
     
-    match list.remove(2) {
-        Ok(_) => println!("Removed element 2."),
-        Err(e) => println!("Error removing element: {:?}", e),
-    }
-    
-    match list.remove_at(0) {
-        Ok(_) => println!("Removed element at position 0."),
-        Err(e) => println!("Error removing element at position: {:?}", e),
-    }
-    
-    match list.replace(20, 0) {
-        Ok(_) => println!("Replaced element at position 0."),
-        Err(e) => println!("Error replacing element: {:?}", e),
-    }
-    
-    match list.get(0) {
-        Ok(value) => println!("Element at position 0: {:?}", value),
-        Err(e) => println!("Error retrieving element: {:?}", e),
-    }
-    
-    println!("Is list empty? {}", list.is_empty());
-    println!("Is list full? {}", list.is_full());
 }

@@ -1,77 +1,97 @@
-// Definieren Sie eine generische Stack-Struktur
-pub struct Stack<T> {
-    elements: Vec<T>,
+#[derive(Clone)]
+pub struct Node<T> {
+    pub data: T,
+    pub next: Option<Box<Node<T>>>,
 }
 
-#[derive(Debug)]
-pub enum StackError {
-    EmptyStack,            // Fehler, wenn versucht wird, ein Element von einem leeren Stack zu entfernen
-    Overflow,              // Fehler, wenn der Stack seine maximale Kapazität erreicht
-    InvalidPosition,       // Fehler, wenn eine ungültige Position angegeben wird
-    ElementNotFound,       // Fehler, wenn ein zu entfernendes Element nicht gefunden wird
+#[derive(Clone)]
+pub struct Stack<T> {
+    pub head: Option<Box<Node<T>>>,
+    pub length: i32,
 }
 
 impl<T> Stack<T> {
-    // Neue Instanz eines leeren Stacks erstellen
     pub fn new() -> Self {
         Stack {
-            elements: Vec::new(),
+            head: None,
+            length: 0,
         }
     }
 
-    // push(elem): Fügt ein neues Element dem Stapel hinzu.
-    pub fn push(&mut self, item: T) {
-        self.elements.push(item);
-    }
-
-    // pushAll(elems): Fügt alle Elemente dem Stapel hinzu. Wenn möglich, dann nutzen Sie eine variadische Methode (*Varargs* in Java).
-    pub fn push_all<I>(&mut self, items: I)
+    pub fn equals(&self, other: &Stack<T>) -> bool
     where
-        I: IntoIterator<Item = T>,
+        T: PartialEq,
     {
-        for item in items {
-            self.push(item);
+        if self.length != other.length {
+            return false;
         }
+
+        let mut current_self = &self.head;
+        let mut current_other = &other.head;
+
+        while let (Some(node_self), Some(node_other)) = (current_self, current_other) {
+            if node_self.data != node_other.data {
+                return false;
+            }
+            current_self = &node_self.next;
+            current_other = &node_other.next;
+        }
+
+        true
     }
 
-    // pop(): Entfernt das zuletzt hinzugefügte Element.
-    pub fn pop(&mut self) -> Result<T, StackError> {
-        self.elements.pop().ok_or(StackError::EmptyStack)
+    // Gibt die Liste als String zurück
+    pub fn to_string(&self) -> String
+    where
+        T: ToString,
+    {
+        let mut result = String::new();
+        let mut current = &self.head;
+
+        while let Some(node) = current {
+            result.push_str(&node.data.to_string());
+            if node.next.is_some() {
+                result.push_str(" -> ");
+            }
+            current = &node.next;
+        }
+
+        result
     }
 
-    // Speek(): Gibt das zuletzt hinzugefügte Element zurück, ohne es zu entfernen.
-    pub fn peek(&self) -> Option<&T> {
-        self.elements.last()
+    // Gibt die Größe der Liste zurück
+    pub fn size(&self) -> i32 {
+        self.length
     }
 
-    // isEmpty(): true wenn der Stack leer ist sonst false
+    // Überprüft, ob die Liste leer ist
     pub fn is_empty(&self) -> bool {
-        self.elements.is_empty()
+        self.length == 0
     }
 
-    // isFull(): false wenn der Stack leer ist sonst true
+    // Überprüft, ob die Liste voll ist
+    pub fn is_full(&self) -> bool {
+        self.length != 0
+    }
+    pub fn push(&mut self, data: T) {
+        let new_node = Box::new(Node {
+            data,
+            next: self.head.take(),
+        });
+        self.head = Some(new_node);
+        self.length += 1;
+    }
 
-    pub fn is_full(&mut self) -> bool {
-        let length = self.elements.len();
-        if length != 0 {
-            true
+    // Pop-Funktion: Entfernt das oberste Element vom Stack und gibt es zurück
+    pub fn pop(&mut self) -> Option<T> {
+        if let Some(node) = self.head.take() {
+            self.head = node.next;
+            self.length -= 1;
+            Some(node.data)
         } else {
-            false
+            None // Wenn der Stack leer ist, geben wir None zurück
         }
     }
+
 }
 
-
- 
-
-
-
-/*
-push(elem): Fügt ein neues Element dem Stapel hinzu.
-pushAll(elems): Fügt alle Elemente dem Stapel hinzu. Wenn möglich, dann nutzen Sie eine variadische Methode (*Varargs* in Java).
-pop(): Entfernt das zuletzt hinzugefügte Element.
-peek(): Gibt das zuletzt hinzugefügte Element zurück, ohne es zu entfernen.
-size(): Gibt die Anzahl der Elemente des Stacks zurück.
-isEmpty(): true wenn der Stack leer ist sonst false
-isFull(): false wenn der Stack leer ist sonst true
-*/
