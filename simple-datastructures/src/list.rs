@@ -1,6 +1,18 @@
-// linked_list.rs
-use crate::node::Node;
 
+#[derive(Debug)]
+pub struct Node<T> {
+    pub content: T,
+    pub next: Option<Box<Node<T>>>,
+}
+
+impl<T> Node<T> {
+    pub fn new(content: T) -> Self {
+        Node {
+            content,
+            next: None,
+        }
+    }
+}
 #[derive(Debug)]
 pub struct LinkedList<T> {
     pub head: Option<Box<Node<T>>>,
