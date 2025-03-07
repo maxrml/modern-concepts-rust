@@ -1,86 +1,192 @@
-use crate::stack::Stack;
-use crate::stack::Node;
-#[derive(Clone)]
+// linked_list.rs
+use crate::node::Node;
+
+#[derive(Debug)]
 pub struct LinkedList<T> {
-    stack: Stack<T>,    // Wir nutzen den Stack als Baustein
-    tail: Option<Box<Node<T>>>,  // Der `tail`-Zeiger auf das letzte Element
+    pub head: Option<Box<Node<T>>>,
 }
 
-impl<T> LinkedList<T>
-where T: Clone,
-{
+impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> {
+    /// Erzeugt eine neue leere Liste.
     pub fn new() -> Self {
-        LinkedList {
-            stack: Stack::new(), // Der Stack wird hier als Baustein verwendet
-            tail: None,          // Anfangs gibt es keinen Tail
-        }
+        LinkedList { head: None }
     }
 
-    // Fügt ein Element am Anfang der Liste hinzu
-    pub fn push_front(&mut self, data: T) {
-        self.stack.push(data);
-
-        // Wenn die Liste leer war, ist das neue Element sowohl `head` als auch `tail`
-        if self.tail.is_none() {
-            if let Some(ref mut head) = self.stack.head {
-                self.tail = Some(head.clone());
-            }
-        }
-    }
-
-    // Fügt ein Element am Ende der Liste hinzu
-    pub fn push_back(&mut self, data: T) {
-        let new_node = Box::new(Node {
-            data: data.clone(),
-            next: None,
-        });
-
-        // Wenn die Liste leer ist, setzen wir das neue Element als `head` und `tail`
-        if self.stack.is_empty() {
-            self.stack.push(data); // Ein Element als `head`
-            self.tail = Some(new_node); // Setzen des `tail`
-        } else {
-            // Andernfalls fügen wir das neue Element hinter dem aktuellen `tail` hinzu
-            if let Some(ref mut tail) = self.tail {
-                tail.next = Some(new_node.clone());
-            }
-            self.tail = Some(new_node); // Das neue Element wird zum `tail`
-        }
-    }
-
-    // Entfernt das erste Element der Liste
-    pub fn pop_front(&mut self) -> Option<T> {
-        let popped = self.stack.pop();
-        
-        // Wenn die Liste jetzt leer ist, setzen wir `tail` auf `None`
-        if self.stack.is_empty() {
-            self.tail = None;
-        }
-        
-        popped
-    }
-
-    // Gibt die Größe der Liste zurück
-    pub fn size(&self) -> i32 {
-        self.stack.size()
-    }
-
-    // Überprüft, ob die Liste leer ist
-    pub fn is_empty(&self) -> bool {
-        self.stack.is_empty()
-    }
-
-    // Gibt die Liste als String zurück
+    /// Gibt eine String-Repräsentation der Liste zurück
     pub fn to_string(&self) -> String
     where
         T: ToString,
     {
-        self.stack.to_string()
+        let mut s = String::new();
+        let mut current = self.head.as_ref();
+        while let Some(node) = current {
+            s.push_str(&node.content.to_string());
+            s.push_str(" ");
+            current = node.next.as_ref();
+        }
+        s.trim_end().to_string()
     }
 
-    // Gibt das letzte Element der Liste zurück
-    pub fn peek_tail(&self) -> Option<&T> {
-        self.tail.as_ref().map(|node| &node.data)
+    /// Prüft, ob die Liste leer ist
+    pub fn is_empty(&self) -> bool {
+        self.head.is_none()
+    }
+
+    /// Gibt die Anzahl der Elemente in der Liste zurück
+    pub fn size(&self) -> usize {
+        let mut count = 0;
+        let mut current = self.head.as_ref();
+        while let Some(node) = current {
+            count += 1;
+            current = node.next.as_ref();
+        }
+        count
+    }
+
+    /// Gibt den Inhalt des Elements am angegebenen Index zurück
+    pub fn content(&self, index: usize) -> Option<T> {
+        let mut current = self.head.as_ref();
+        for _ in 0..index {
+            current = current?.next.as_ref();
+        }
+        current.map(|node| node.content)
+    }
+
+    /// Ersetzt den Inhalt des Elements am angegebenen Index
+    pub fn replace(&mut self, index: usize, element: T) {
+        let mut current = match self.head.as_mut() {
+            Some(node) => node,
+            None => return,
+        };
+        for _ in 0..index {
+            if let Some(next) = current.next.as_mut() {
+                current = next;
+            } else {
+                current.content = element;
+                return;
+            }
+        }
+        current.content = element;
+    }
+
+    /// Fügt ein neues Element an der angegebenen Stelle ein
+    pub fn insert(&mut self, index: usize, element: T) {
+        if index == 0 {
+            self.add_first(element);
+            return;
+        }
+        let mut current = match self.head.as_mut() {
+            Some(node) => node,
+            None => return,
+        };
+        for _ in 0..(index - 1) {
+            if let Some(next) = current.next.as_mut() {
+                current = next;
+            } else {
+                return;
+            }
+        }
+        let new_node = Box::new(Node {
+            content: element,
+            next: current.next.take(),
+        });
+        current.next = Some(new_node);
+    }
+
+    /// Fügt ein neues Element am Anfang der Liste hinzu
+    pub fn add_first(&mut self, element: T) {
+        let new_node = Box::new(Node {
+            content: element,
+            next: self.head.take(),
+        });
+        self.head = Some(new_node);
+    }
+
+    /// Hängt ein neues Element am Ende der Liste an
+    pub fn add(&mut self, element: T) {
+        let new_node = Box::new(Node {
+            content: element,
+            next: None,
+        });
+        match self.head.as_mut() {
+            None => self.head = Some(new_node),
+            Some(mut node) => {
+                while let Some(ref mut next) = node.next {
+                    node = next;
+                }
+                node.next = Some(new_node);
+            }
+        }
+    }
+
+    /// Entfernt das erste Element der Liste und gibt dessen Inhalt zurück
+    pub fn remove_first(&mut self) -> Option<T> {
+        self.head.take().map(|node| {
+            self.head = node.next;
+            node.content
+        })
+    }
+
+    /// Entfernt das Element an der angegebenen Stelle
+    pub fn remove_at(&mut self, index: usize) {
+        if index == 0 {
+            self.head = self.head.take().and_then(|node| node.next);
+            return;
+        }
+        let mut current = match self.head.as_mut() {
+            Some(node) => node,
+            None => return,
+        };
+        for _ in 0..(index - 1) {
+            if let Some(next) = current.next.as_mut() {
+                current = next;
+            } else {
+                return;
+            }
+        }
+        if let Some(next_node) = current.next.take() {
+            current.next = next_node.next;
+        }
+    }
+
+    /// Entfernt das erste Element, dessen Inhalt dem gesuchten Wert entspricht und gibt dessen Inhalt zurück
+    pub fn remove(&mut self, element: &T) -> Option<T> {
+        if let Some(ref head) = self.head {
+            if head.content == *element {
+                return self.remove_first();
+            }
+        } else {
+            return None;
+        }
+        let mut current = self.head.as_mut().unwrap();
+        while let Some(ref mut next_node) = current.next {
+            if next_node.content == *element {
+                let removed = current.next.take();
+                if let Some(mut removed_node) = removed {
+                    current.next = removed_node.next.take();
+                    return Some(removed_node.content);
+                }
+            } else {
+                if current.next.is_some() {
+                    current = current.next.as_mut().unwrap();
+                } else {
+                    break;
+                }
+            }
+        }
+        println!("Could not find node with content '{}'", element);
+        None
+    }
+
+    /// Überprüft, ob die Liste ein Element mit dem gesuchten Inhalt enthält
+    pub fn get(&self, element: &T) -> bool {
+        let mut current = self.head.as_ref();
+        while let Some(node) = current {
+            if node.content == *element {
+                return true;
+            }
+            current = node.next.as_ref();
+        }
+        false
     }
 }
-
