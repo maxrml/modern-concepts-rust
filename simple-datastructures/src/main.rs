@@ -7,90 +7,64 @@ use list::LinkedList;
 
 
 fn main() {
-    // Demonstration der Stack-Klasse
-    println!("--- Stack Demo ---");
+    // **Stack Beispiel:**
     let mut stack: Stack<i32> = Stack::new();
-    
-    // Push-Operationen
-    stack.push(10);
-    stack.push(20);
-    stack.push(30);
-    
-    // Ausgabe des Stacks
-    println!("Stack: {}", stack.to_string());
-    
-    // Pop-Operation
-    if let Some(val) = stack.pop() {
-        println!("Pop: {}", val);
+    stack.push(1);
+    stack.push(2);
+    stack.push(3);
+
+    println!("Stack (nach Pushen): {}", stack.to_string());
+
+    if let Some(top) = stack.peek() {
+        println!("Oberstes Element im Stack: {}", top);
     }
-    
-    // Stack nach Pop
-    println!("Stack nach Pop: {}", stack.to_string());
-    
-    // Stack-Methoden
+
+    if let Some(popped) = stack.pop() {
+        println!("Pop vom Stack: {}", popped);
+    }
+
+    println!("Stack (nach Pop): {}", stack.to_string());
     println!("Stack Größe: {}", stack.size());
     println!("Ist der Stack leer? {}", stack.is_empty());
 
-    // Erstellen eines weiteren Stacks und vergleichen
-    let mut another_stack = Stack::new();
-    another_stack.push(20);
-    another_stack.push(10);
-    
-    println!("Sind die beiden Stacks gleich? {}", stack.equals(&another_stack));
-
-    let mut queue = Queue::new();
-    queue.enqueue(1);
-    queue.enqueue(2);
-    queue.enqueue(3);
-    
-    println!("Queue: {}", queue.to_string()); // Output: 1 -> 2 -> 3
-
-    println!("Dequeue: {:?}", queue.dequeue()); // Output: Some(1)
-    println!("Queue: {}", queue.to_string()); // Output: 2 -> 3
-
-    queue.enqueue(4);
-    println!("Queue: {}", queue.to_string()); // Output: 2 -> 3 -> 4
-    
+    // **LinkedList Beispiel:**
     let mut list = LinkedList::new();
+    list.add(vec![10, 20, 30]);
+    println!("LinkedList (nach Hinzufügen): {}", list.to_string());
 
-    // Füge einige Elemente hinzu
-    println!("Füge 10 hinzu:");
-    list.push_back(10);
-    println!("{}", list.to_string());  // Erwartete Ausgabe: 10
-
-    println!("Füge 20 hinzu:");
-    list.push_back(20);
-    println!("{}", list.to_string());  // Erwartete Ausgabe: 10 -> 20
-
-    println!("Füge 30 hinzu:");
-    list.push_back(30);
-    println!("{}", list.to_string());  // Erwartete Ausgabe: 10 -> 20 -> 30
-
-    // Füge ein Element vorne hinzu
-    println!("Füge 5 vorne hinzu:");
-    list.push_front(5);
-    println!("{}", list.to_string());  // Erwartete Ausgabe: 5 -> 10 -> 20 -> 30
-
-    // Poppe das erste Element (vorne)
-    println!("Poppe das erste Element (vorne):");
-    list.pop_front();
-    println!("{}", list.to_string());  // Erwartete Ausgabe: 10 -> 20 -> 30
-
-    // Zeige das letzte Element (tail)
-    println!("Das letzte Element ist: {:?}", list.peek_tail());  // Erwartete Ausgabe: Some(30)
-
-    // Teste die Größe der Liste
-    println!("Die Größe der Liste ist: {}", list.size());  // Erwartete Ausgabe: 3
-
-    // Überprüfe, ob die Liste leer ist
-    println!("Ist die Liste leer? {}", list.is_empty());  // Erwartete Ausgabe: false
-
-    // Entferne alle Elemente
-    println!("Poppe alle Elemente:");
-    while let Some(item) = list.pop_front() {
-        println!("Entferntes Element: {}", item);
+    if let Some(value) = list.get(1) {
+        println!("Element an Position 1 in der LinkedList: {}", value);
     }
-    println!("Ist die Liste leer? {}", list.is_empty());  
 
+    list.insert(25, 1);
+    println!("LinkedList (nach Einfügen an Position 1): {}", list.to_string());
+
+    list.remove(20);
+    println!("LinkedList (nach Entfernen von 20): {}", list.to_string());
+
+    list.replace(35, 0);
+    println!("LinkedList (nach Ersetzen an Position 0): {}", list.to_string());
+
+    println!("LinkedList Größe: {}", list.size());
+    println!("Ist die LinkedList leer? {}", list.is_empty());
+
+    // **Queue Beispiel:**
+    let mut queue = Queue::new();
+    queue.enqueue(5);
+    queue.enqueue(10);
+    queue.enqueue(15);
     
+    println!("Queue (nach Enqueue): {}", queue.to_string());
+
+    if let Some(front) = queue.peek() {
+        println!("Vorderstes Element in der Queue: {}", front);
+    }
+
+    if let Some(dequeued) = queue.dequeue() {
+        println!("Dequeue von der Queue: {}", dequeued);
+    }
+
+    println!("Queue (nach Dequeue): {}", queue.to_string());
+    println!("Queue Größe: {}", queue.size());
+    println!("Ist die Queue leer? {}", queue.is_empty());
 }

@@ -1,65 +1,133 @@
-use crate::stack::Stack;
-use crate::stack::Node;
+use crate::stack::{Stack, Node};
+
 #[derive(Clone)]
 pub struct LinkedList<T> {
     stack: Stack<T>,    // Wir nutzen den Stack als Baustein
-    tail: Option<Box<Node<T>>>,  // Der `tail`-Zeiger auf das letzte Element
 }
 
 impl<T> LinkedList<T>
-where T: Clone,
+where T: Clone + PartialEq,
 {
     pub fn new() -> Self {
         LinkedList {
             stack: Stack::new(), // Der Stack wird hier als Baustein verwendet
-            tail: None,          // Anfangs gibt es keinen Tail
         }
     }
 
-    // Fügt ein Element am Anfang der Liste hinzu
-    pub fn push_front(&mut self, data: T) {
-        self.stack.push(data);
+    // Gibt das Element an der angegebenen Position zurück
+    pub fn get(&self, pos: i32) -> Option<&T> {
+        let mut current = &self.stack.head;
 
-        // Wenn die Liste leer war, ist das neue Element sowohl `head` als auch `tail`
-        if self.tail.is_none() {
-            if let Some(ref mut head) = self.stack.head {
-                self.tail = Some(head.clone());
+        let mut index = 0;
+        while let Some(node) = current {
+            if index == pos {
+                return Some(&node.data);
             }
+            current = &node.next;
+            index += 1;
+        }
+
+        None // Position existiert nicht
+    }
+
+    // Fügt mehrere Elemente am Anfang der Liste hinzu
+    pub fn add(&mut self, elems: Vec<T>) {
+        for elem in elems.into_iter().rev() {
+            self.stack.push(elem);
         }
     }
 
-    // Fügt ein Element am Ende der Liste hinzu
-    pub fn push_back(&mut self, data: T) {
-        let new_node = Box::new(Node {
-            data: data.clone(),
-            next: None,
-        });
+    // Fügt ein Element an der angegebenen Position ein
+    pub fn insert(&mut self, elem: T, pos: i32) {
+        let mut current = &mut self.stack.head;
+        let mut index = 0;
 
-        // Wenn die Liste leer ist, setzen wir das neue Element als `head` und `tail`
-        if self.stack.is_empty() {
-            self.stack.push(data); // Ein Element als `head`
-            self.tail = Some(new_node); // Setzen des `tail`
+        while let Some(ref mut node) = current {
+            if index == pos {
+                let new_node = Box::new(Node {
+                    data: elem,
+                    next: node.next.take(),
+                });
+                node.next = Some(new_node);
+                self.stack.length += 1;
+                return;
+            }
+            current = &mut node.next;
+            index += 1;
+        }
+
+        // Wenn die Position größer als die aktuelle Länge ist, fügen wir am Ende an
+        self.stack.push(elem);
+    }
+    pub fn remove_at(&mut self, pos: i32) -> Option<T> {
+        if pos == 0 {
+            return self.stack.pop();
         } else {
-            // Andernfalls fügen wir das neue Element hinter dem aktuellen `tail` hinzu
-            if let Some(ref mut tail) = self.tail {
-                tail.next = Some(new_node.clone());
+            let mut current = &mut self.stack.head;
+            let mut index = 0;
+    
+            // Wir durchlaufen die Liste bis zur Position
+            while let Some(ref mut node) = current {
+                if index == pos - 1 { // Wir müssen das Element an der Position pos entfernen
+                    if let Some(mut to_remove) = node.next.take() {
+                        node.next = to_remove.next.take(); // Der aktuelle Knoten wird mit dem nächsten verbunden
+                        self.stack.length -= 1;
+                        return Some(to_remove.data); // Das entfernte Element wird zurückgegeben
+                    }
+                }
+                current = &mut node.next;
+                index += 1;
             }
-            self.tail = Some(new_node); // Das neue Element wird zum `tail`
         }
+        None
+    }
+    
+    
+
+    // Ersetzt das Element an der angegebenen Position
+    pub fn replace(&mut self, elem: T, pos: i32) -> Option<T> {
+        let mut current = &mut self.stack.head;
+        let mut index = 0;
+
+        while let Some(ref mut node) = current {
+            if index == pos {
+                let old_data = std::mem::replace(&mut node.data, elem);
+                return Some(old_data);
+            }
+            current = &mut node.next;
+            index += 1;
+        }
+
+        None // Position existiert nicht
     }
 
-    // Entfernt das erste Element der Liste
-    pub fn pop_front(&mut self) -> Option<T> {
-        let popped = self.stack.pop();
-        
-        // Wenn die Liste jetzt leer ist, setzen wir `tail` auf `None`
-        if self.stack.is_empty() {
-            self.tail = None;
-        }
-        
-        popped
-    }
+    pub fn remove(&mut self, value: T) -> Option<T> {
+        let mut current = &mut self.stack.head;
 
+        // Sonderfall: Das erste Element soll entfernt werden
+        if let Some(node) = current {
+            if node.data == value {
+                return self.stack.pop();
+            }
+        }
+
+        // Durchlaufe die Liste, um das Element zu finden
+        while let Some(ref mut node) = current {
+            if let Some(ref next_node) = node.next {
+                if next_node.data == value {
+                    if let Some(removed) = node.next.take() {
+                        node.next = removed.next;
+                        self.stack.length -= 1;
+                        return Some(removed.data);
+                    }
+                }
+            }
+            current = &mut node.next;
+        }
+
+        None // Element wurde nicht gefunden
+    }
+    
     // Gibt die Größe der Liste zurück
     pub fn size(&self) -> i32 {
         self.stack.size()
@@ -70,6 +138,10 @@ where T: Clone,
         self.stack.is_empty()
     }
 
+    pub fn is_full(&self) -> bool {
+        self.stack.is_full()
+    }
+
     // Gibt die Liste als String zurück
     pub fn to_string(&self) -> String
     where
@@ -77,10 +149,4 @@ where T: Clone,
     {
         self.stack.to_string()
     }
-
-    // Gibt das letzte Element der Liste zurück
-    pub fn peek_tail(&self) -> Option<&T> {
-        self.tail.as_ref().map(|node| &node.data)
-    }
 }
-

@@ -26,8 +26,19 @@ impl<T> Queue<T> {
             }
         }
 
-        // Nun sollte das älteste Element oben auf stack_out sein
         self.stack_out.pop()
+    }
+
+    pub fn peek(&mut self) -> Option<&T> {
+        // Falls stack_out leer ist, müssen wir zuerst die Elemente umschichten
+        if self.stack_out.is_empty() {
+            while let Some(data) = self.stack_in.pop() {
+                self.stack_out.push(data);
+            }
+        }
+
+        // Jetzt enthält stack_out das älteste Element oben
+        self.stack_out.peek()
     }
 
     // Gibt die Größe der Queue zurück
