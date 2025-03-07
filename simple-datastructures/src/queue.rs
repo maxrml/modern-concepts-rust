@@ -51,38 +51,34 @@ impl<T> Queue<T> {
         self.stack_in.is_empty() && self.stack_out.is_empty()
     }
 
+    pub fn is_full(&self) -> bool {
+        !self.stack_in.is_empty() || !self.stack_out.is_empty()
+    }
+
     // Gibt die Queue als String zurück
     pub fn to_string(&self) -> String
     where
         T: ToString,
     {
-        let mut result = String::new();
+        let mut elements = Vec::new();
+        let mut stack_out_vec = Vec::new();
         let mut current = &self.stack_out.head;
 
         // Zuerst die Elemente von stack_out
         while let Some(node) = current {
-            result.push_str(&node.data.to_string());
-            if node.next.is_some() {
-                result.push_str(" -> ");
-            }
+            stack_out_vec.push(node.data.to_string());
             current = &node.next;
         }
+        stack_out_vec.reverse(); // Reihenfolge korrigieren
 
-        // Dann die Elemente von stack_in (in umgekehrter Reihenfolge)
-        let mut stack_in_vec = Vec::new();
+        // Dann die Elemente von stack_in (richtige Reihenfolge)
         let mut current_in = &self.stack_in.head;
         while let Some(node) = current_in {
-            stack_in_vec.push(node.data.to_string());
+            elements.push(node.data.to_string());
             current_in = &node.next;
         }
 
-        if !stack_in_vec.is_empty() {
-            if !result.is_empty() {
-                result.push_str(" -> ");
-            }
-            result.push_str(&stack_in_vec.join(" -> "));
-        }
-
-        result
+        stack_out_vec.extend(elements);
+        stack_out_vec.join(" -> ")
     }
 }
