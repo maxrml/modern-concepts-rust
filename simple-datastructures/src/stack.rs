@@ -1,110 +1,58 @@
-#[derive(Clone)]
-pub struct Node<T> {
-    pub data: T,
-    pub next: Option<Box<Node<T>>>,
-}
-
-#[derive(Clone)]
-pub struct Stack<T> {
-    pub head: Option<Box<Node<T>>>,
-    pub length: i32,
-}
-
-impl<T> Stack<T> {
-    pub fn new() -> Self {
-        Stack {
-            head: None,
-            length: 0,
-        }
-    }
-
-    pub fn to_string(&self) -> String
-    where
-        T: ToString,
-    {
-        let mut result = String::new();
-        let mut current = &self.head;
-
-        while let Some(node) = current {
-            result.push_str(&node.data.to_string());
-            if node.next.is_some() {
-                result.push_str(" -> ");
-            }
-            current = &node.next;
-        }
-
-        result
-    }
-
-    pub fn size(&self) -> i32 {
-        self.length
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.length == 0
-    }
-
-    pub fn is_full(&self) -> bool {
-        self.length != 0
-    }
-
-    pub fn push(&mut self, data: T) {
-        let new_node = Box::new(Node {
-            data,
-            next: self.head.take(),
-        });
-        self.head = Some(new_node);
-        self.length += 1;
-    }
-
-    pub fn push_multiple<I>(&mut self, iter: I)
-    where
-        I: IntoIterator<Item = T>,
-    {
-        for item in iter {
-            self.push(item);
-        }
-    }
-
-    pub fn pop(&mut self) -> Option<T> {
-        if let Some(node) = self.head.take() {
-            self.head = node.next;
-            self.length -= 1;
-            Some(node.data)
-        } else {
-            None 
-        }
-    }
-
-    pub fn peek(&self) -> Option<&T> {
-        match self.head {
-            Some(ref node) => Some(&node.data),
-            None => None,
-        }
-    }
-
-    pub fn equals(&self, other: &Stack<T>) -> bool
-    where
-        T: PartialEq,
-    {
-        if self.length != other.length {
-            return false;
-        }
-
-        let mut current_self = &self.head;
-        let mut current_other = &other.head;
-
-        while let (Some(node_self), Some(node_other)) = (current_self, current_other) {
-            if node_self.data != node_other.data {
-                return false;
-            }
-            current_self = &node_self.next;
-            current_other = &node_other.next;
-        }
-
-        true
+mod datastructure;
+use datastructure::Datastructure;
+    
+    // Definiert eine generische Stack-Struktur
+    pub struct Stack<T> {
+        elements: Vec<T>,
     }
     
+    #[derive(Debug)]
+    pub enum StackError {
+        EmptyStack,            // Fehler, wenn versucht wird, ein Element von einem leeren Stack zu entfernen
+        Overflow,              // Fehler, wenn der Stack seine maximale Kapazität erreicht
+        InvalidPosition,       // Fehler, wenn eine ungültige Position angegeben wird
+        ElementNotFound,       // Fehler, wenn ein zu entfernendes Element nicht gefunden wird
+    }
+        
+    
+    impl<T> Datastructure for Stack<T>{
+        // Neue Instanz eines leeren Stacks erstellen
+        fn new() -> Self {
+            Stack {
+                elements: Vec::new(),
+            }
+        }
+    
+        // push(elem): Fügt ein neues Element dem Stapel hinzu.
+        fn push(&mut self, item: T) {
+            self.elements.push(item);
+        }
+    
+        // pushAll(elems): Fügt alle Elemente dem Stapel hinzu. Wenn möglich, dann nutzen Sie eine variadische Methode (*Varargs* in Java).
+        fn push_all<I>(&mut self, items: I)
+        where
+            I: IntoIterator<Item = T>,
+        {
+            for item in items {
+                self.push(item);
+            }
+        }
+    
+        // pop(): Entfernt das zuletzt hinzugefügte Element.
+        fn pop(&mut self) -> Result<T, StackError> {
+            self.elements.pop().ok_or(StackError::EmptyStack)
+        }
+    
+        // Speek(): Gibt das zuletzt hinzugefügte Element zurück, ohne es zu entfernen.
+        fn peek(&self) -> Option<&T> {
+            self.elements.last()
+        }
+    
+        
+    }
 
-}
 
+    /*
+    push(elem): Fügt ein neues Element dem Stapel hinzu.
+    pushAll(elems): Fügt alle Elemente dem Stapel hinzu. Wenn möglich, dann nutzen Sie eine variadische Methode (*Varargs* in Java).
+    */
