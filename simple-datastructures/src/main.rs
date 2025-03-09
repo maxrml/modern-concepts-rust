@@ -1,10 +1,11 @@
-mod stack;  // Modul deklarieren 
+mod stack; 
 use stack::Stack;
 mod queue;
 use queue::Queue;
 mod list;
 use list::LinkedList;
-
+mod datastructure;
+use crate::datastructure::Datastructure;
 
 
 fn main() {

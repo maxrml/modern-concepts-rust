@@ -1,3 +1,5 @@
+
+
 pub trait Datastructure{
 
     // isEmpty(): true wenn der Stack leer ist sonst false

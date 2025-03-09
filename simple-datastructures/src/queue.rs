@@ -1,10 +1,12 @@
 use crate::stack::Stack;
+use crate::datastructure::Datastructure;
+
 pub struct Queue<T> {
     stack_in: Stack<T>,  // Stack für das Einfügen von Elementen
     stack_out: Stack<T>, // Stack für das Entfernen von Elementen
 }
 
-impl<T> Queue<T> {
+impl<T: PartialEq + std::fmt::Display> Queue<T> {
     pub fn new() -> Self {
         Queue {
             stack_in: Stack::new(),
@@ -20,7 +22,7 @@ impl<T> Queue<T> {
     // Entfernt das älteste Element aus der Queue (Pop von stack_out)
     pub fn dequeue(&mut self) -> Option<T> {
         // Wenn stack_out leer ist, verschiebe alle Elemente von stack_in nach stack_out
-        if self.stack_out.is_empty() {
+        if Datastructure::is_empty(&self.stack_out) {
             while let Some(data) = self.stack_in.pop() {
                 self.stack_out.push(data);
             }
@@ -34,17 +36,22 @@ impl<T> Queue<T> {
     pub fn size(&self) -> i32 {
         self.stack_in.size() + self.stack_out.size()
     }
+}
 
-    // Überprüft, ob die Queue leer ist
-    pub fn is_empty(&self) -> bool {
-        self.stack_in.is_empty() && self.stack_out.is_empty()
+// Implementierung des Datastructure-Traits für Queue
+impl<T> Datastructure for Queue<T> 
+where 
+    T: PartialEq + ToString,
+{
+    // Vergleicht zwei Queues auf Gleichheit
+    fn equals(&self, other: &Self) -> bool {
+        // Da wir die innere Struktur einer Queue nicht direkt vergleichen können,
+        // konvertieren wir beide zu Strings und vergleichen diese
+        self.to_string() == other.to_string()
     }
 
     // Gibt die Queue als String zurück
-    pub fn to_string(&self) -> String
-    where
-        T: ToString,
-    {
+    fn to_string(&self) -> String {
         let mut result = String::new();
         let mut current = &self.stack_out.head;
 
@@ -73,5 +80,15 @@ impl<T> Queue<T> {
         }
 
         result
+    }
+
+    // Überprüft, ob die Queue leer ist
+    fn is_empty(&self) -> bool {
+        self.stack_in.is_empty() && self.stack_out.is_empty()
+    }
+
+    // Überprüft, ob die Queue voll ist
+    fn is_full(&mut self) -> bool {
+        false // Eine Queue mit verketteten Listen kann theoretisch unbegrenzt wachsen
     }
 }

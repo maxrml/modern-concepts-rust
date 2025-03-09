@@ -1,6 +1,4 @@
-
-use datastructure::Datastructure;
-
+use crate::datastructure::Datastructure;
 
 #[derive(Clone)]
 pub struct Node<T> {
@@ -22,14 +20,12 @@ impl<T> Stack<T> {
         }
     }
 
-
-    // Gibt die Größe der Liste zurück
+    // Gibt die Größe des Stacks zurück
     pub fn size(&self) -> i32 {
         self.length
     }
-
     
-    }
+    // Fügt ein Element oben auf den Stack
     pub fn push(&mut self, data: T) {
         let new_node = Box::new(Node {
             data,
@@ -49,16 +45,20 @@ impl<T> Stack<T> {
             None // Wenn der Stack leer ist, geben wir None zurück
         }
     }
+    
+    // Gibt das oberste Element zurück, ohne es zu entfernen
+    pub fn peek(&self) -> Option<&T> {
+        self.head.as_ref().map(|node| &node.data)
+    }
+}
 
-
-
-
-impl datastructure::Datastructure for <T> Stack<T> {
-
-    pub fn equals(&self, other: &Stack<T>) -> bool
-    where
-        T: PartialEq,
-    {
+// Implementierung des Datastructure-Traits
+impl<T> Datastructure for Stack<T>
+where
+    T: PartialEq + ToString,
+{
+    // Vergleicht zwei Datenstrukturen auf Gleichheit
+    fn equals(&self, other: &Self) -> bool {
         if self.length != other.length {
             return false;
         }
@@ -77,11 +77,8 @@ impl datastructure::Datastructure for <T> Stack<T> {
         true
     }
 
-    // Gibt die Liste als String zurück
-    pub fn to_string(&self) -> String
-    where
-        T: ToString,
-    {
+    // Gibt den Stack als String zurück
+    fn to_string(&self) -> String {
         let mut result = String::new();
         let mut current = &self.head;
 
@@ -96,17 +93,14 @@ impl datastructure::Datastructure for <T> Stack<T> {
         result
     }
 
-    // Überprüft, ob die Liste leer ist
-    pub fn is_empty(&self) -> bool {
+    // Überprüft, ob der Stack leer ist
+    fn is_empty(&self) -> bool {
         self.length == 0
     }
 
-    // Überprüft, ob die Liste voll ist
-    pub fn is_full(&self) -> bool {
-        self.length != 0
-
-
+    // Überprüft, ob der Stack voll ist - bei einer verketteten Liste 
+    // ist der Stack nie voll, daher immer false
+    fn is_full(&mut self) -> bool {
+        false
+    }
 }
-}
-
-
