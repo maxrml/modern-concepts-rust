@@ -1,3 +1,7 @@
+
+use datastructure::Datastructure;
+
+
 #[derive(Clone)]
 pub struct Node<T> {
     pub data: T,
@@ -17,6 +21,39 @@ impl<T> Stack<T> {
             length: 0,
         }
     }
+
+
+    // Gibt die Größe der Liste zurück
+    pub fn size(&self) -> i32 {
+        self.length
+    }
+
+    
+    }
+    pub fn push(&mut self, data: T) {
+        let new_node = Box::new(Node {
+            data,
+            next: self.head.take(),
+        });
+        self.head = Some(new_node);
+        self.length += 1;
+    }
+
+    // Pop-Funktion: Entfernt das oberste Element vom Stack und gibt es zurück
+    pub fn pop(&mut self) -> Option<T> {
+        if let Some(node) = self.head.take() {
+            self.head = node.next;
+            self.length -= 1;
+            Some(node.data)
+        } else {
+            None // Wenn der Stack leer ist, geben wir None zurück
+        }
+    }
+
+
+
+
+impl datastructure::Datastructure for <T> Stack<T> {
 
     pub fn equals(&self, other: &Stack<T>) -> bool
     where
@@ -59,11 +96,6 @@ impl<T> Stack<T> {
         result
     }
 
-    // Gibt die Größe der Liste zurück
-    pub fn size(&self) -> i32 {
-        self.length
-    }
-
     // Überprüft, ob die Liste leer ist
     pub fn is_empty(&self) -> bool {
         self.length == 0
@@ -72,26 +104,9 @@ impl<T> Stack<T> {
     // Überprüft, ob die Liste voll ist
     pub fn is_full(&self) -> bool {
         self.length != 0
-    }
-    pub fn push(&mut self, data: T) {
-        let new_node = Box::new(Node {
-            data,
-            next: self.head.take(),
-        });
-        self.head = Some(new_node);
-        self.length += 1;
-    }
 
-    // Pop-Funktion: Entfernt das oberste Element vom Stack und gibt es zurück
-    pub fn pop(&mut self) -> Option<T> {
-        if let Some(node) = self.head.take() {
-            self.head = node.next;
-            self.length -= 1;
-            Some(node.data)
-        } else {
-            None // Wenn der Stack leer ist, geben wir None zurück
-        }
-    }
 
 }
+}
+
 
