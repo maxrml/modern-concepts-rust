@@ -1,26 +1,19 @@
 
 
-mod stack;
-use stack::Stack;
+mod list;
+use list::LinkedList;
 
 
 fn main() {
-    // **Stack Beispiel:**
-let mut stack: Stack<i32> = Stack::new();
-stack.push(1);
-stack.push(2);
-stack.push(3);
+    let mut list = LinkedList::new();
 
+    // Elemente hinzufügen
 
+    list.push_back(3);
+    list.push_back(4);
 
-stack.peek();
+    println!("Liste: {}", list.to_string());
+    
 
-stack.pop();
-
-
-
-
-println!("{}",stack);
-
-    //  methods are not working
+   
 }
