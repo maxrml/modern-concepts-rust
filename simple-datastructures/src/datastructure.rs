@@ -1,6 +1,5 @@
-mod datastructure {
+pub mod datastructure;
 
-pub struct Datastr
 
 pub trait Datastructure{
 
@@ -19,6 +18,4 @@ pub trait Datastructure{
 
     fn to_string(&self) -> String;  //eine Repräsentation als String haben (toString), die den Inhalt der Datenstruktur darstellt
                                          //und die die programmatische Rekonstruktion der Datenstruktur ermöglicht bzw. erleichtert.
-}
-
 }
