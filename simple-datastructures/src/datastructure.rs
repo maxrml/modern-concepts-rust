@@ -2,12 +2,17 @@
 
 pub trait Datastructure{
 
-    // isEmpty(): true wenn der Stack leer ist sonst false
-    fn is_empty(&self) -> bool;
+    // isEmpty(): true wenn leer ist sonst false
+    fn is_empty(&self) -> bool ;
 
-    // isFull(): false wenn der Stack leer ist sonst true
-    fn is_full(&mut self) -> bool;
+    
 
+    // isFull(): false wenn leer ist sonst true
+    fn is_full(&mut self) -> bool {
+        !self.is_empty()
+    }
+
+    
     fn equals(&self, other: &Self) -> bool; // Gibt true zurück, wenn zwei Datenstrukturen des gleichen Typs 
                                               // die gleichen Werte (in gleicher Reihenfolge) enthalten; sonst false.
 

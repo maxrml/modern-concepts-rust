@@ -87,8 +87,5 @@ where
         self.stack_in.is_empty() && self.stack_out.is_empty()
     }
 
-    // Überprüft, ob die Queue voll ist
-    fn is_full(&mut self) -> bool {
-        false // Eine Queue mit verketteten Listen kann theoretisch unbegrenzt wachsen
-    }
-}
+    
+} 

@@ -1,3 +1,4 @@
+use crate::datastructure::Datastructure;
 
 #[derive(Debug)]
 pub struct Node<T> {
@@ -24,25 +25,7 @@ impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> {
         LinkedList { head: None }
     }
 
-    /// Gibt eine String-Repräsentation der Liste zurück
-    pub fn to_string(&self) -> String
-    where
-        T: ToString,
-    {
-        let mut s = String::new();
-        let mut current = self.head.as_ref();
-        while let Some(node) = current {
-            s.push_str(&node.content.to_string());
-            s.push_str(" ");
-            current = node.next.as_ref();
-        }
-        s.trim_end().to_string()
-    }
-
-    /// Prüft, ob die Liste leer ist
-    pub fn is_empty(&self) -> bool {
-        self.head.is_none()
-    }
+    
 
     /// Gibt die Anzahl der Elemente in der Liste zurück
     pub fn size(&self) -> usize {
@@ -201,4 +184,40 @@ impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> {
         }
         false
     }
+}
+
+
+
+
+impl<T> Datastructure for LinkedList<T> 
+where 
+T: std::fmt::Display + PartialEq + Copy,
+{
+    
+    /// Gibt eine String-Repräsentation der Liste zurück
+    fn to_string(&self) -> String
+    where
+        T: ToString,
+    {
+        let mut s = String::new();
+        let mut current = self.head.as_ref();
+        while let Some(node) = current {
+            s.push_str(&node.content.to_string());
+            s.push_str(" ");
+            current = node.next.as_ref();
+        }
+        s.trim_end().to_string()
+    }
+
+    /// Prüft, ob die Liste leer ist
+    fn is_empty(&self) -> bool {
+        self.head.is_none()
+    }
+    
+    fn equals(&self, other: &Self) -> bool {
+        todo!()
+    }
+    
+    
+
 }

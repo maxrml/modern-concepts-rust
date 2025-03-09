@@ -52,6 +52,10 @@ impl<T> Stack<T> {
     }
 }
 
+
+
+
+
 // Implementierung des Datastructure-Traits
 impl<T> Datastructure for Stack<T>
 where
@@ -100,7 +104,7 @@ where
 
     // Überprüft, ob der Stack voll ist - bei einer verketteten Liste 
     // ist der Stack nie voll, daher immer false
-    fn is_full(&mut self) -> bool {
-        false
-    }
+    //fn is_full(&mut self) -> bool {
+    //    false
+    //}
 }
