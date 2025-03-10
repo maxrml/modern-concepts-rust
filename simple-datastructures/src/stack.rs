@@ -62,25 +62,7 @@ impl<T> Datastructure for Stack<T>
 where
     T: PartialEq + ToString,
 {
-    // Vergleicht zwei Datenstrukturen auf Gleichheit
-    fn equals(&self, other: &Self) -> bool {
-        if self.length != other.length {
-            return false;
-        }
-
-        let mut current_self = &self.head;
-        let mut current_other = &other.head;
-
-        while let (Some(node_self), Some(node_other)) = (current_self, current_other) {
-            if node_self.data != node_other.data {
-                return false;
-            }
-            current_self = &node_self.next;
-            current_other = &node_other.next;
-        }
-
-        true
-    }
+    
 
     // Gibt den Stack als String zurück
     fn to_string(&self) -> String {

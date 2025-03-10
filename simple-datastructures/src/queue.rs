@@ -32,21 +32,15 @@ impl<T: PartialEq + std::fmt::Display> Queue<T> {
         self.stack_out.pop()
     }
 
-    pub fn peek(&mut self) -> Option<T>{
-        if Datastructure::is_empty(&self.stack_out) { // wenn stack out leer ist 
+    pub fn peek(&mut self) -> Option<&T> {
+        // Falls stack_out leer ist, müssen wir zuerst die Elemente umschichten
+        if self.stack_out.is_empty() {
             while let Some(data) = self.stack_in.pop() {
                 self.stack_out.push(data);
             }
-            Some(self.stack_out.peek())
-        } 
-        if Datastructure::is_empty(&self.stack_out) && Datastructure::is_empty(&self.stack_in){ // wenn beide stacks leer
-            None
-
-        } 
-        else {
-            Some(self.stack_out.peek())
-
         }
+        self.stack_out.peek()
+        
     }
 
     
@@ -57,12 +51,7 @@ impl<T> Datastructure for Queue<T>
 where 
     T: PartialEq + ToString,
 {
-    // Vergleicht zwei Queues auf Gleichheit
-    fn equals(&self, other: &Self) -> bool {
-        // Da wir die innere Struktur einer Queue nicht direkt vergleichen können,
-        // konvertieren wir beide zu Strings und vergleichen diese
-        self.to_string() == other.to_string()
-    }
+
 
     // Gibt die Queue als String zurück
     fn to_string(&self) -> String {

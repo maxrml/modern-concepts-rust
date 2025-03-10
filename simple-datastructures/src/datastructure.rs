@@ -12,7 +12,10 @@ pub trait Datastructure{
 
     // Gibt true zurück, wenn zwei Datenstrukturen des gleichen Typs 
     // die gleichen Werte (in gleicher Reihenfolge) enthalten; sonst false.
-    fn equals(&self, other: &Self) -> bool; 
+    fn equals(&self, other: &Self) -> bool {
+        // konvertieren wir beide zu Strings und vergleichen diese
+        self.to_string() == other.to_string()
+    }
 
     //eine Repräsentation als String haben (toString), die den Inhalt der Datenstruktur darstellt
     //und die die programmatische Rekonstruktion der Datenstruktur ermöglicht bzw. erleichtert.

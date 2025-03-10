@@ -215,10 +215,7 @@ T: std::fmt::Display + PartialEq + Copy,
         count
     }
 
-    // Vergleicht zwei Datenstrukturen auf Gleichheit
-    fn equals(&self, other: &Self) -> bool {
-        todo!()
-    }
+ 
 
 
 }
