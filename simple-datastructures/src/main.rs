@@ -9,8 +9,11 @@ use crate::datastructure::Datastructure;
 
 
 fn main() {
+
+    println!("===================================");
+    println!("Stack");
+    println!("===================================");
     // Demonstration der Stack-Klasse
-    println!("--- Stack Demo ---");
     let mut stack: Stack<i32> = Stack::new();
     
     // Push-Operationen
@@ -36,7 +39,6 @@ fn main() {
     println!("Was ist das oberste Element? {:?}", stack.peek());
 
     
-    
 
     // Erstellen eines weiteren Stacks und vergleichen
     let mut another_stack = Stack::new();
@@ -44,6 +46,11 @@ fn main() {
     another_stack.push(10);
     
     println!("Sind die beiden Stacks gleich? {}", stack.equals(&another_stack));
+
+
+    println!("===================================");
+    println!("Queue");
+    println!("===================================");
 
     let mut queue = Queue::new();
     queue.enqueue(1);
@@ -57,6 +64,21 @@ fn main() {
 
     queue.enqueue(4);
     println!("Queue: {}", queue.to_string()); // Output: 2 -> 3 -> 4
+
+
+    // Queue-Methoden
+    println!("Queue Größe: {}", queue.size());
+    println!("Ist die Queue leer? {}", queue.is_empty());
+    println!("Ist die Queue voll? {}", queue.is_full());
+    println!("Was ist das oberste Element? {:?}", queue.peek());
+
+    // Erstellen eines weitere Queue und vergleichen
+    let mut another_queue = Queue::new();
+    another_queue.enqueue(20);
+    another_queue.enqueue(10);
+    println!("Queue 1: {}", queue.to_string());
+    println!("Queue 2: {}", another_queue.to_string());
+    println!("Sind die beiden Queues gleich? {}", queue.equals(&another_queue));
     
    
     println!("===================================");
