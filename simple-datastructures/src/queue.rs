@@ -36,9 +36,9 @@ impl<T> Queue<T> {
                 self.stack_out.push(data);
             }
         }
+        self.stack_out.head
+        }
 
-        // Jetzt enthält stack_out das älteste Element oben
-        self.stack_out.peek()
     }
 
     // Gibt die Größe der Queue zurück
