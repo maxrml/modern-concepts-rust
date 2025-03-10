@@ -7,7 +7,8 @@ pub struct Node<T> {
 }
 
 impl<T> Node<T> {
-    pub fn new() -> Self {
+    #[allow(dead_code)]
+    pub fn new(content: T) -> Self {
         Node {
             content,
             next: None,
@@ -217,6 +218,7 @@ T: std::fmt::Display + PartialEq + Copy,
     // Vergleicht zwei Datenstrukturen auf Gleichheit
     fn equals(&self, other: &Self) -> bool {
         todo!()
-    }  
+    }
+
 
 }
