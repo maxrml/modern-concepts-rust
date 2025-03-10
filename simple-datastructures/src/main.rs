@@ -32,6 +32,11 @@ fn main() {
     // Stack-Methoden
     println!("Stack Größe: {}", stack.size());
     println!("Ist der Stack leer? {}", stack.is_empty());
+    println!("Ist der Stack voll? {}", stack.is_full());
+    println!("Was ist das oberste Element? {:?}", stack.peek());
+
+    
+    
 
     // Erstellen eines weiteren Stacks und vergleichen
     let mut another_stack = Stack::new();

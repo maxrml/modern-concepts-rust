@@ -20,24 +20,13 @@ pub struct LinkedList<T> {
     pub head: Option<Box<Node<T>>>,
 }
 
-impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> {
+
+impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> { // Display ist für eine angenehm formatierte Ausgabe
     /// Erzeugt eine neue leere Liste.
     pub fn new() -> Self {
         LinkedList { head: None }
     }
 
-    
-
-    /// Gibt die Anzahl der Elemente in der Liste zurück
-    pub fn size(&self) -> usize {
-        let mut count = 0;
-        let mut current = self.head.as_ref();
-        while let Some(node) = current {
-            count += 1;
-            current = node.next.as_ref();
-        }
-        count
-    }
 
     /// Gibt den Inhalt des Elements am angegebenen Index zurück
     pub fn content(&self, index: usize) -> Option<T> {
@@ -214,13 +203,22 @@ T: std::fmt::Display + PartialEq + Copy,
     fn is_empty(&self) -> bool {
         self.head.is_none()
     }
-    
+
+    /// Gibt die Anzahl der Elemente in der Liste zurück
+    fn size(&self) -> i32 {
+        let mut count = 0;
+        let mut current = self.head.as_ref();
+        while let Some(node) = current {
+            count += 1;
+            current = node.next.as_ref();
+        }
+        count
+    }
+
+    // Vergleicht zwei Datenstrukturen auf Gleichheit
     fn equals(&self, other: &Self) -> bool {
         todo!()
     }
 
-    
-    
-    
 
 }

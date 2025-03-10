@@ -32,10 +32,24 @@ impl<T: PartialEq + std::fmt::Display> Queue<T> {
         self.stack_out.pop()
     }
 
-    // Gibt die Größe der Queue zurück
-    pub fn size(&self) -> i32 {
-        self.stack_in.size() + self.stack_out.size()
+    pub fn peek(&mut self) -> Option<T>{
+        if Datastructure::is_empty(&self.stack_out) { // wenn stack out leer ist 
+            while let Some(data) = self.stack_in.pop() {
+                self.stack_out.push(data);
+            }
+            Some(self.stack_out.peek())
+        } 
+        if Datastructure::is_empty(&self.stack_out) && Datastructure::is_empty(&self.stack_in){ // wenn beide stacks leer
+            None
+
+        } 
+        else {
+            Some(self.stack_out.peek())
+
+        }
     }
+
+    
 }
 
 // Implementierung des Datastructure-Traits für Queue
@@ -85,6 +99,11 @@ where
     // Überprüft, ob die Queue leer ist
     fn is_empty(&self) -> bool {
         self.stack_in.is_empty() && self.stack_out.is_empty()
+    }
+
+    // Gibt die Größe der Queue zurück
+    fn size(&self) -> i32 {
+        self.stack_in.size() + self.stack_out.size()
     }
 
     
