@@ -204,6 +204,10 @@ T: std::fmt::Display + PartialEq + Copy,
         self.head.is_none()
     }
 
+    fn peek(&mut self) -> Option<&T>{
+        todo!()
+    }
+
     /// Gibt die Anzahl der Elemente in der Liste zurück
     fn size(&self) -> i32 {
         let mut count = 0;

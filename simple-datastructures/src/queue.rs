@@ -32,19 +32,11 @@ impl<T: PartialEq + std::fmt::Display> Queue<T> {
         self.stack_out.pop()
     }
 
-    pub fn peek(&mut self) -> Option<&T> {
-        // Falls stack_out leer ist, müssen wir zuerst die Elemente umschichten
-        if self.stack_out.is_empty() {
-            while let Some(data) = self.stack_in.pop() {
-                self.stack_out.push(data);
-            }   
-        }
-        self.stack_out.peek()  
         
-    }
+}
 
     
-}
+
 
 // Implementierung des Datastructure-Traits für Queue
 impl<T> Datastructure for Queue<T> 
@@ -82,6 +74,16 @@ where
         }
 
         result
+    }
+
+    fn peek(&mut self) -> Option<&T> {
+        // Falls stack_out leer ist, müssen wir zuerst die Elemente umschichten
+        if self.stack_out.is_empty() {
+            while let Some(data) = self.stack_in.pop() {
+                self.stack_out.push(data);
+            }   
+        }
+        self.stack_out.peek()  
     }
 
     // Überprüft, ob die Queue leer ist

@@ -10,6 +10,9 @@ pub trait Datastructure{
     // Gibt die Anzahl der Elemente in der Liste zurück
     fn size(&self) -> i32;
 
+    // Gibt das älteste Element zurück, ohne es zu entfernen
+    fn peek(&mut self) -> Option<&T>;
+
     // Gibt true zurück, wenn zwei Datenstrukturen des gleichen Typs 
     // die gleichen Werte (in gleicher Reihenfolge) enthalten; sonst false.
     fn equals(&self, other: &Self) -> bool {

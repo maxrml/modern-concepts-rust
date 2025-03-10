@@ -87,6 +87,14 @@ where
         result
     }
 
+    // Gibt das oberste Element zurück, ohne es zu entfernen
+    fn peek(&self) -> Option<&T> {
+        match self.head {
+            Some(ref node) => Some(&node.data),
+            None => None,// Wenn der Stack leer ist, geben wir None zurück
+        }
+    }
+
     // Überprüft, ob der Stack leer ist
     fn is_empty(&self) -> bool {
         self.length == 0
