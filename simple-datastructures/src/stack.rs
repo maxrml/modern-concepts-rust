@@ -65,7 +65,7 @@ impl<T> Stack<T> {
 
 
 // Implementierung des Datastructure-Traits
-impl<T> Datastructure for Stack<T>
+impl<T> Datastructure<T> for Stack<T>
 where
     T: PartialEq + ToString + std::fmt::Display,
 {
@@ -88,7 +88,7 @@ where
     }
 
     // Gibt das oberste Element zurück, ohne es zu entfernen
-    fn peek(&self) -> Option<&T> {
+    fn peek(&mut self) -> Option<&T>{
         match self.head {
             Some(ref node) => Some(&node.data),
             None => None,// Wenn der Stack leer ist, geben wir None zurück

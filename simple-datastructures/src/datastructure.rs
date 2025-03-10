@@ -1,4 +1,4 @@
-pub trait Datastructure{
+pub trait Datastructure<T>{
     // isEmpty(): true wenn leer ist sonst false
     fn is_empty(&self) -> bool ;
 

@@ -39,7 +39,7 @@ impl<T: PartialEq + std::fmt::Display> Queue<T> {
 
 
 // Implementierung des Datastructure-Traits für Queue
-impl<T> Datastructure for Queue<T> 
+impl<T> Datastructure<T> for Queue<T> 
 where 
     T: PartialEq + ToString + std::fmt::Display + ,
 {

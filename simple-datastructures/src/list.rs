@@ -179,7 +179,7 @@ impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> { // Display ist fü
 
 
 
-impl<T> Datastructure for LinkedList<T> 
+impl<T> Datastructure<T> for LinkedList<T> 
 where 
 T: std::fmt::Display + PartialEq + Copy,
 {
