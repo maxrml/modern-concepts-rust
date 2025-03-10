@@ -36,10 +36,11 @@ impl<T> Queue<T> {
                 self.stack_out.push(data);
             }
         }
-        self.stack_out.head
-        }
-
+        self.stack_out.peek()
+        
     }
+
+    
 
     // Gibt die Größe der Queue zurück
     pub fn size(&self) -> i32 {
