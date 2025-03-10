@@ -12,6 +12,8 @@ pub struct Stack<T> {
     pub length: i32,
 }
 
+
+
 impl<T> Stack<T> {
     pub fn new() -> Self {
         Stack {
@@ -20,10 +22,6 @@ impl<T> Stack<T> {
         }
     }
 
-    // Gibt die Größe des Stacks zurück
-    pub fn size(&self) -> i32 {
-        self.length
-    }
     
     // Fügt ein Element oben auf den Stack
     pub fn push(&mut self, data: T) {
@@ -48,7 +46,10 @@ impl<T> Stack<T> {
     
     // Gibt das oberste Element zurück, ohne es zu entfernen
     pub fn peek(&self) -> Option<&T> {
-        self.head.as_ref().map(|node| &node.data)
+        match self.head {
+            Some(ref node) => Some(&node.data),
+            None => None,// Wenn der Stack leer ist, geben wir None zurück
+        }
     }
 }
 
@@ -102,9 +103,9 @@ where
         self.length == 0
     }
 
-    // Überprüft, ob der Stack voll ist - bei einer verketteten Liste 
-    // ist der Stack nie voll, daher immer false
-    //fn is_full(&mut self) -> bool {
-    //    false
-    //}
+    // Gibt die Größe des Stacks zurück
+    fn size(&self) -> i32 {
+        self.length
+    } 
 }
+
