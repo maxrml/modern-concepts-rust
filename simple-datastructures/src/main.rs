@@ -47,6 +47,29 @@ fn main() {
     
     println!("Sind die beiden Stacks gleich? {}", stack.equals(&another_stack));
 
+    // Mehrere Elemente auf Stack pushen
+    let mut more_stack: Stack<i32> = Stack::new();
+    more_stack.push_all(vec![1, 2, 3, 4, 5]);
+    println!("Oberster Wert im Stack: {}", more_stack.peek().unwrap());
+
+
+    // komplexe Datentypen Array
+    let a = [1, 2, 3, 4, 5];
+    let b = [1,32, 4235, 2324];
+    let c = [1,32, 4235, 2324, 2, 3, 4, 5];
+
+    let mut stack_complex: Stack<&[i32]> = Stack::new();
+    stack_complex.push(&a);
+    stack_complex.push(&b);
+    stack_complex.push(&c);
+
+    println!("Komplexe Datentype im Stack: {:#?}", stack_complex.peek().unwrap());
+    stack_complex.pop();
+    stack_complex.pop();
+    stack_complex.pop();
+
+
+
 
     println!("===================================");
     println!("Queue");

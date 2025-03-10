@@ -33,6 +33,13 @@ impl<T> Stack<T> {
         self.length += 1;
     }
 
+    // Fügt mehrere Elemente oben auf den Stack
+    pub fn push_all<I: IntoIterator<Item = T>>(&mut self, data: I) {
+        for item in data {
+            self.push(item);
+        }
+    }
+
     // Pop-Funktion: Entfernt das oberste Element vom Stack und gibt es zurück
     pub fn pop(&mut self) -> Option<T> {
         if let Some(node) = self.head.take() {
@@ -60,7 +67,7 @@ impl<T> Stack<T> {
 // Implementierung des Datastructure-Traits
 impl<T> Datastructure for Stack<T>
 where
-    T: PartialEq + ToString,
+    T: PartialEq + ToString + std::fmt::Display,
 {
     
 
@@ -91,7 +98,9 @@ where
     } 
 }
 
-// Testing
+// ------------------------------Testing--------------------------------
+
+
 #[cfg(test)]
 mod tests {
     use super::*;

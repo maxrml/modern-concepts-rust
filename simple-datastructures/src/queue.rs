@@ -37,9 +37,9 @@ impl<T: PartialEq + std::fmt::Display> Queue<T> {
         if self.stack_out.is_empty() {
             while let Some(data) = self.stack_in.pop() {
                 self.stack_out.push(data);
-            }
+            }   
         }
-        self.stack_out.peek()
+        self.stack_out.peek()  
         
     }
 
@@ -49,7 +49,7 @@ impl<T: PartialEq + std::fmt::Display> Queue<T> {
 // Implementierung des Datastructure-Traits für Queue
 impl<T> Datastructure for Queue<T> 
 where 
-    T: PartialEq + ToString,
+    T: PartialEq + ToString + std::fmt::Display + ,
 {
 
     // Gibt die Queue als String zurück
@@ -97,7 +97,8 @@ where
     
 } 
 
-// Testing
+// ------------------------------Testing--------------------------------
+
 #[cfg(test)]
 mod tests {
     use super::*;
