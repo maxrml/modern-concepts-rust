@@ -7,6 +7,7 @@ pub struct Node<T> {
 }
 
 impl<T> Node<T> {
+    #[allow(dead_code)]
     pub fn new(content: T) -> Self {
         Node {
             content,
@@ -217,6 +218,8 @@ T: std::fmt::Display + PartialEq + Copy,
     fn equals(&self, other: &Self) -> bool {
         todo!()
     }
+
+    
     
     
 

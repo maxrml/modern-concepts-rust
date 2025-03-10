@@ -129,5 +129,9 @@ fn main() {
     println!("get(25) erster Aufruf: {}", list.get(&25));
     println!("get(45) zweiter Aufruf: {}", list.get(&45));
 
-    
+    // For no unused warnings
+    queue.size();
+    stack.peek();
+
+
 }

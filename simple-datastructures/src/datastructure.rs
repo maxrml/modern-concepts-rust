@@ -1,5 +1,3 @@
-
-
 pub trait Datastructure{
 
     // isEmpty(): true wenn leer ist sonst false
