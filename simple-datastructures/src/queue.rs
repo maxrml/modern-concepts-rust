@@ -52,7 +52,6 @@ where
     T: PartialEq + ToString,
 {
 
-
     // Gibt die Queue als String zurück
     fn to_string(&self) -> String {
         let mut result = String::new();
@@ -108,6 +107,17 @@ mod tests {
         let queue: Queue<i32> = Queue::new();
         assert!(queue.is_empty());
         assert_eq!(queue.size(), 0);
+    }
+
+    #[test]
+    fn test_peek() {
+        let mut queue: Queue<i32> = Queue::new();
+        queue.enqueue(10);
+        queue.enqueue(20);
+        queue.enqueue(30);
+
+        let peek = queue.peek();
+        assert_eq!(peek.unwrap(), &10);
     }
 
     #[test]
