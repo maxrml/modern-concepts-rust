@@ -139,9 +139,9 @@ mod tests {
     fn test_to_string() {
         let mut queue = Queue::new();
         
-        queue.enqueue(100);
-        queue.enqueue(110);
         queue.enqueue(120);
+        queue.enqueue(110);
+        queue.enqueue(100);
 
         let output = queue.to_string();
         assert_eq!(output, "100 -> 110 -> 120");

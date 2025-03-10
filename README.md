@@ -193,3 +193,17 @@ flowchart TD
   - Each sub-expression is grouped properly with curly braces to ensure correct LaTeX rendering.
 
 ---
+# Data Structures Documentation
+
+Coverage:
+
+install:
+rustup component add llvm-tools-preview
+cargo install grcov
+
+test:
+CARGO_INCREMENTAL=0 RUSTFLAGS="-Cinstrument-coverage" LLVM_PROFILE_FILE="profile-%p-%m.profraw" cargo test
+
+present into html:
+grcov . --binary-path target/debug/ -s . -t html --branch --ignore-not-existing -o coverage/
+
