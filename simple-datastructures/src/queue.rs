@@ -108,3 +108,78 @@ where
 
     
 } 
+
+// Testing
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new_queue() {
+        let queue: Queue<i32> = Queue::new();
+        assert!(queue.is_empty());
+        assert_eq!(queue.size(), 0);
+    }
+
+    #[test]
+    fn test_enqueue_dequeue() {
+        let mut queue = Queue::new();
+        
+        queue.enqueue(10);
+        queue.enqueue(20);
+        queue.enqueue(30);
+
+        assert_eq!(queue.size(), 3);
+        
+        assert_eq!(queue.dequeue(), Some(10));
+        assert_eq!(queue.dequeue(), Some(20));
+        assert_eq!(queue.dequeue(), Some(30));
+        
+        assert!(queue.is_empty());
+    }
+
+    #[test]
+    fn test_size_after_operations() {
+        let mut queue = Queue::new();
+        
+        queue.enqueue(40);
+        queue.enqueue(50);
+        assert_eq!(queue.size(), 2);
+        
+        queue.dequeue();
+        assert_eq!(queue.size(), 1);
+        
+        queue.dequeue();
+        assert_eq!(queue.size(), 0);
+
+        assert!(queue.is_empty());
+    }
+
+    #[test]
+    fn test_to_string() {
+        let mut queue = Queue::new();
+        
+        queue.enqueue(120);
+        queue.enqueue(110);
+        queue.enqueue(100);
+
+        let output = queue.to_string();
+        assert_eq!(output, "100 -> 110 -> 120");
+    }
+
+    #[test]
+    fn test_equals() {
+        let mut queue1 = Queue::new();
+        let mut queue2 = Queue::new();
+        
+        queue1.enqueue(1);
+        queue1.enqueue(2);
+        queue2.enqueue(1);
+        queue2.enqueue(2);
+        
+        assert!(queue1.equals(&queue2));
+        
+        queue2.enqueue(3);
+        assert!(!queue1.equals(&queue2));
+    }
+}

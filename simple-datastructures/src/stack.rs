@@ -109,3 +109,72 @@ where
     } 
 }
 
+// Testing
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new_stack() {
+        let stack: Stack<i32> = Stack::new();
+        assert!(stack.is_empty());
+        assert_eq!(stack.size(), 0);
+    }
+
+    #[test]
+    fn test_push() {
+        let mut stack = Stack::new();
+        stack.push(10);
+        stack.push(20);
+        assert_eq!(stack.size(), 2);
+        assert_eq!(stack.peek(), Some(&20));
+    }
+
+    #[test]
+    fn test_pop() {
+        let mut stack = Stack::new();
+        stack.push(30);
+        stack.push(40);
+        assert_eq!(stack.pop(), Some(40));
+        assert_eq!(stack.size(), 1);
+        assert_eq!(stack.pop(), Some(30));
+        assert_eq!(stack.size(), 0);
+        assert!(stack.is_empty());
+        assert_eq!(stack.pop(), None);
+    }
+
+    #[test]
+    fn test_peek() {
+        let mut stack = Stack::new();
+        stack.push(50);
+        assert_eq!(stack.peek(), Some(&50));
+
+        stack.pop();
+        assert_eq!(stack.peek(), None);
+    }
+
+    #[test]
+    fn test_to_string() {
+        let mut stack = Stack::new();
+        stack.push(60);
+        stack.push(70);
+        stack.push(80);
+        assert_eq!(stack.to_string(), "80 -> 70 -> 60");
+    }
+
+    #[test]
+    fn test_equals() {
+        let mut stack1 = Stack::new();
+        let mut stack2 = Stack::new();
+
+        stack1.push(90);
+        stack1.push(100);
+        stack2.push(90);
+        stack2.push(100);
+
+        assert!(stack1.equals(&stack2));
+
+        stack2.pop();
+        assert!(!stack1.equals(&stack2));
+    }
+}

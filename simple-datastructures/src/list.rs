@@ -222,3 +222,111 @@ T: std::fmt::Display + PartialEq + Copy,
 
 
 }
+
+// Testing
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new_linked_list() {
+        let list: LinkedList<i32> = LinkedList::new();
+        assert!(list.is_empty());
+        assert_eq!(list.size(), 0);
+    }
+
+    #[test]
+    fn test_add_first() {
+        let mut list = LinkedList::new();
+        list.add_first(10);
+        assert_eq!(list.size(), 1);
+        assert_eq!(list.content(0), Some(10));
+    }
+
+    #[test]
+    fn test_add() {
+        let mut list = LinkedList::new();
+        list.add(20);
+        list.add(30);
+        assert_eq!(list.size(), 2);
+        assert_eq!(list.content(0), Some(20));
+        assert_eq!(list.content(1), Some(30));
+    }
+
+    #[test]
+    fn test_remove_first() {
+        let mut list = LinkedList::new();
+        list.add(40);
+        list.add(50);
+        let removed = list.remove_first();
+        assert_eq!(removed, Some(40));
+        assert_eq!(list.size(), 1);
+        assert_eq!(list.content(0), Some(50));
+    }
+
+    #[test]
+    fn test_insert() {
+        let mut list = LinkedList::new();
+        list.add(60);
+        list.add(70);
+        list.insert(1, 65);
+        assert_eq!(list.size(), 3);
+        assert_eq!(list.content(0), Some(60));
+        assert_eq!(list.content(1), Some(65));
+        assert_eq!(list.content(2), Some(70));
+    }
+
+    #[test]
+    fn test_replace() {
+        let mut list = LinkedList::new();
+        list.add(80);
+        list.add(90);
+        list.replace(1, 85);
+        assert_eq!(list.size(), 2);
+        assert_eq!(list.content(0), Some(80));
+        assert_eq!(list.content(1), Some(85));
+    }
+
+    #[test]
+    fn test_remove_at() {
+        let mut list = LinkedList::new();
+        list.add(100);
+        list.add(110);
+        list.add(120);
+        list.remove_at(1);
+        assert_eq!(list.size(), 2);
+        assert_eq!(list.content(0), Some(100));
+        assert_eq!(list.content(1), Some(120));
+    }
+
+    #[test]
+    fn test_remove() {
+        let mut list = LinkedList::new();
+        list.add(130);
+        list.add(140);
+        list.add(150);
+        let removed = list.remove(&140);
+        assert_eq!(removed, Some(140));
+        assert_eq!(list.size(), 2);
+        assert_eq!(list.content(0), Some(130));
+        assert_eq!(list.content(1), Some(150));
+    }
+
+    #[test]
+    fn test_get() {
+        let mut list = LinkedList::new();
+        list.add(160);
+        list.add(170);
+        assert!(list.get(&160));
+        assert!(!list.get(&180));
+    }
+
+    #[test]
+    fn test_to_string() {
+        let mut list = LinkedList::new();
+        list.add(1);
+        list.add(2);
+        list.add(3);
+        assert_eq!(list.to_string(), "1 2 3");
+    }
+}
