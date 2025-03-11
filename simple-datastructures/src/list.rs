@@ -27,16 +27,6 @@ impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> { // Display ist fü
         LinkedList { head: None }
     }
 
-
-    /// Gibt den Inhalt des Elements am angegebenen Index zurück
-    pub fn content(&self, index: usize) -> Option<T> {
-        let mut current = self.head.as_ref();
-        for _ in 0..index {
-            current = current?.next.as_ref();
-        }
-        current.map(|node| node.content)
-    }
-
     /// Ersetzt den Inhalt des Elements am angegebenen Index
     pub fn replace(&mut self, index: usize, element: T) {
         let mut current = match self.head.as_mut() {
@@ -174,6 +164,15 @@ impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> { // Display ist fü
         }
         false
     }
+
+    /// Gibt den Inhalt des Elements am angegebenen Index zurück
+    pub fn content(&self, index: usize) -> Option<T> {
+        let mut current = self.head.as_ref();
+        for _ in 0..index {
+            current = current?.next.as_ref();
+        }
+        current.map(|node| node.content)
+    }
 }
 
 
@@ -236,6 +235,7 @@ mod tests {
         assert_eq!(list.size(), 0);
     }
 
+
     #[test]
     fn test_add_first() {
         let mut list = LinkedList::new();
@@ -288,6 +288,7 @@ mod tests {
         assert_eq!(list.content(1), Some(85));
     }
 
+
     #[test]
     fn test_remove_at() {
         let mut list = LinkedList::new();
@@ -311,6 +312,15 @@ mod tests {
         assert_eq!(list.size(), 2);
         assert_eq!(list.content(0), Some(130));
         assert_eq!(list.content(1), Some(150));
+    }
+
+    #[test]
+    fn test_remove_none() {
+        let mut list = LinkedList::new();
+        list.add(130);
+        list.add(140);
+        list.add(150);
+        assert_eq!(list.remove(&120), None);
     }
 
     #[test]
