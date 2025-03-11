@@ -25,6 +25,7 @@ impl<T> Stack<T> {
     
     // Fügt ein Element oben auf den Stack
     pub fn push(&mut self, data: T) {
+        // Neuer Knoten mit Kontent und Pointer
         let new_node = Box::new(Node {
             data,
             next: self.head.take(),
@@ -35,6 +36,7 @@ impl<T> Stack<T> {
 
     // Fügt mehrere Elemente oben auf den Stack
     pub fn push_all<I: IntoIterator<Item = T>>(&mut self, data: I) {
+        // Iteriert durch und pusht einzeln
         for item in data {
             self.push(item);
         }
@@ -69,8 +71,6 @@ impl<T> Datastructure<T> for Stack<T>
 where
     T: PartialEq + ToString + std::fmt::Display,
 {
-    
-
     // Gibt den Stack als String zurück
     fn to_string(&self) -> String {
         let mut result = String::new();
@@ -87,14 +87,6 @@ where
         result
     }
 
-    // Gibt das oberste Element zurück, ohne es zu entfernen
-    fn peek(&mut self) -> Option<&T>{
-        match self.head {
-            Some(ref node) => Some(&node.data),
-            None => None,// Wenn der Stack leer ist, geben wir None zurück
-        }
-    }
-
     // Überprüft, ob der Stack leer ist
     fn is_empty(&self) -> bool {
         self.length == 0
@@ -105,6 +97,10 @@ where
         self.length
     } 
 }
+
+
+
+
 
 // ------------------------------Testing--------------------------------
 
@@ -127,6 +123,14 @@ mod tests {
         stack.push(20);
         assert_eq!(stack.size(), 2);
         assert_eq!(stack.peek(), Some(&20));
+    }
+
+    #[test]
+    fn test_push_all() {
+        let mut stack = Stack::new();
+        stack.push_all(vec![1, 2, 3, 4, 5]);
+        assert_eq!(stack.size(), 5);
+        assert_eq!(stack.peek(), Some(&5));
     }
 
     #[test]
@@ -153,6 +157,12 @@ mod tests {
     }
 
     #[test]
+    fn test_peek_empty() {
+        let stack: Stack<i32> = Stack::new();
+        assert_eq!(stack.peek(), None);
+    }
+
+    #[test]
     fn test_to_string() {
         let mut stack = Stack::new();
         stack.push(60);
@@ -160,6 +170,7 @@ mod tests {
         stack.push(80);
         assert_eq!(stack.to_string(), "80 -> 70 -> 60");
     }
+
 
     #[test]
     fn test_equals() {
