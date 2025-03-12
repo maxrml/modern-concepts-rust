@@ -12,8 +12,6 @@ pub struct Stack<T> {
     pub length: i32,
 }
 
-
-
 impl<T> Stack<T> {
     pub fn new() -> Self {
         Stack {
@@ -22,10 +20,9 @@ impl<T> Stack<T> {
         }
     }
 
-    
     // Fügt ein Element oben auf den Stack
     pub fn push(&mut self, data: T) {
-        // Neuer Knoten mit Kontent und Pointer
+        // Neuer Knoten mit Content und Pointer
         let new_node = Box::new(Node {
             data,
             next: self.head.take(),
@@ -49,28 +46,21 @@ impl<T> Stack<T> {
             self.length -= 1;
             Some(node.data)
         } else {
-            None // Wenn der Stack leer ist, geben wir None zurück
+            None
         }
     }
-    
+
     // Gibt das oberste Element zurück, ohne es zu entfernen
     pub fn peek(&self) -> Option<&T> {
         match self.head {
             Some(ref node) => Some(&node.data),
-            None => None,// Wenn der Stack leer ist, geben wir None zurück
+            None => None,
         }
     }
 }
 
-
-
-
-
 // Implementierung des Datastructure-Traits
-impl<T> Datastructure<T> for Stack<T>
-where
-    T: PartialEq + ToString + std::fmt::Display,
-{
+impl<T> Datastructure<T> for Stack<T> where T: PartialEq + ToString + std::fmt::Display {
     // Gibt den Stack als String zurück
     fn to_string(&self) -> String {
         let mut result = String::new();
@@ -87,27 +77,20 @@ where
         result
     }
 
-    // Überprüft, ob der Stack leer ist
     fn is_empty(&self) -> bool {
         self.length == 0
     }
 
-    // Gibt die Größe des Stacks zurück
     fn size(&self) -> i32 {
         self.length
-    } 
+    }
 }
-
-
-
-
 
 // ------------------------------Testing--------------------------------
 
-
 #[cfg(test)]
 mod tests {
-    use super::*; // Stack nutzbar machen, da tests eigenes mod
+    use super::*;
 
     #[test]
     fn test_new_stack() {
@@ -170,7 +153,6 @@ mod tests {
         stack.push(80);
         assert_eq!(stack.to_string(), "80 -> 70 -> 60");
     }
-
 
     #[test]
     fn test_equals() {

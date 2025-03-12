@@ -21,7 +21,8 @@ pub struct LinkedList<T> {
 }
 
 // Implementierung Fkt ohne Trait
-impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> { // Display ist für eine angenehm formatierte Ausgabe
+impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> {
+    // Display ist für eine angenehm formatierte Ausgabe
     /// Erzeugt eine neue leere Liste (Konstruktor)
     pub fn new() -> Self {
         LinkedList { head: None }
@@ -31,9 +32,12 @@ impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> { // Display ist fü
     pub fn replace(&mut self, index: usize, element: T) {
         let mut current = match self.head.as_mut() {
             Some(node) => node,
-            None => return,
+            None => {
+                return;
+            }
         };
-        for _ in 0..index { // von 0 bis Index
+        for _ in 0..index {
+            // von 0 bis Index
             if let Some(next) = current.next.as_mut() {
                 current = next;
             } else {
@@ -53,9 +57,11 @@ impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> { // Display ist fü
         }
         let mut current = match self.head.as_mut() {
             Some(node) => node,
-            None => return,
+            None => {
+                return;
+            }
         };
-        for _ in 0..(index - 1) {
+        for _ in 0..index - 1 {
             if let Some(next) = current.next.as_mut() {
                 current = next;
             } else {
@@ -85,7 +91,9 @@ impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> { // Display ist fü
             next: None,
         });
         match self.head.as_mut() {
-            None => self.head = Some(new_node),
+            None => {
+                self.head = Some(new_node);
+            }
             Some(mut node) => {
                 while let Some(ref mut next) = node.next {
                     node = next;
@@ -111,9 +119,11 @@ impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> { // Display ist fü
         }
         let mut current = match self.head.as_mut() {
             Some(node) => node,
-            None => return,
+            None => {
+                return;
+            }
         };
-        for _ in 0..(index - 1) {
+        for _ in 0..index - 1 {
             if let Some(next) = current.next.as_mut() {
                 current = next;
             } else {
@@ -176,19 +186,9 @@ impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> { // Display ist fü
     }
 }
 
-
-
-
-impl<T> Datastructure<T> for LinkedList<T> 
-where 
-T: std::fmt::Display + PartialEq + Copy,
-{
-    
+impl<T> Datastructure<T> for LinkedList<T> where T: std::fmt::Display + PartialEq + Copy {
     /// Gibt eine String-Repräsentation der Liste zurück
-    fn to_string(&self) -> String
-    where
-        T: ToString,
-    {
+    fn to_string(&self) -> String where T: ToString {
         let mut s = String::new();
         let mut current = self.head.as_ref();
         while let Some(node) = current {
@@ -204,8 +204,6 @@ T: std::fmt::Display + PartialEq + Copy,
         self.head.is_none()
     }
 
-    
-
     /// Gibt die Anzahl der Elemente in der Liste zurück
     fn size(&self) -> i32 {
         let mut count = 0;
@@ -216,14 +214,9 @@ T: std::fmt::Display + PartialEq + Copy,
         }
         count
     }
-
- 
-
-
 }
 
 // ------------------------------Testing--------------------------------
-
 
 #[cfg(test)]
 mod tests {
@@ -235,7 +228,6 @@ mod tests {
         assert!(list.is_empty());
         assert_eq!(list.size(), 0);
     }
-
 
     #[test]
     fn test_add_first() {
@@ -288,7 +280,6 @@ mod tests {
         assert_eq!(list.content(0), Some(80));
         assert_eq!(list.content(1), Some(85));
     }
-
 
     #[test]
     fn test_remove_at() {

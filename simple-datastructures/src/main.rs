@@ -1,4 +1,4 @@
-mod stack; 
+mod stack;
 use stack::Stack;
 mod queue;
 use queue::Queue;
@@ -7,38 +7,34 @@ use list::LinkedList;
 mod datastructure;
 use crate::datastructure::Datastructure;
 
-
 fn main() {
-
     println!("===================================");
     println!("Stack");
     println!("===================================");
     // Demonstration der Stack-Klasse
     let mut stack: Stack<i32> = Stack::new();
-    
+
     // Push-Operationen
     stack.push(10);
     stack.push(20);
     stack.push(30);
-    
+
     // Ausgabe des Stacks
     println!("Stack: {}", stack.to_string());
-    
+
     // Pop-Operation
     if let Some(val) = stack.pop() {
         println!("Pop: {}", val);
     }
-    
+
     // Stack nach Pop
     println!("Stack nach Pop: {}", stack.to_string());
-    
+
     // Stack-Methoden
     println!("Stack Größe: {}", stack.size());
     println!("Ist der Stack leer? {}", stack.is_empty());
     println!("Ist der Stack voll? {}", stack.is_full());
     println!("Was ist das oberste Element? {:?}", stack.peek());
-
-    
 
     // Erstellen eines weiteren Stacks und vergleichen
     let mut another_stack = Stack::new();
@@ -47,7 +43,7 @@ fn main() {
 
     println!("Stack zu vergleichen: {}", stack.to_string());
     println!("another_stack nach Pop: {}", another_stack.to_string());
-    
+
     println!("Sind die beiden Stacks gleich? {}", stack.equals(&another_stack));
 
     // Mehrere Elemente auf Stack pushen
@@ -56,11 +52,10 @@ fn main() {
     println!("Oberster Wert im Stack: {}", more_stack.peek().unwrap());
     println!("Vector Stack: {}", stack.to_string());
 
-
     // komplexe Datentypen Array
     let a = [1, 2, 3, 4, 5];
-    let b = [1,32, 4235, 2324];
-    let c = [1,32, 4235, 2324, 2, 3, 4, 5];
+    let b = [1, 32, 4235, 2324];
+    let c = [1, 32, 4235, 2324, 2, 3, 4, 5];
 
     let mut stack_complex: Stack<&[i32]> = Stack::new();
     stack_complex.push(&a);
@@ -72,9 +67,6 @@ fn main() {
     stack_complex.pop();
     stack_complex.pop();
 
-
-
-
     println!("===================================");
     println!("Queue");
     println!("===================================");
@@ -83,7 +75,7 @@ fn main() {
     queue.enqueue(1);
     queue.enqueue(2);
     queue.enqueue(3);
-    
+
     println!("Queue: {}", queue.to_string()); // Output: ältestes 3 -> 2 -> 1 neuste
 
     println!("Dequeue: {:?}", queue.dequeue().unwrap()); // Output: Some(1)
@@ -91,7 +83,6 @@ fn main() {
 
     queue.enqueue(4);
     println!("Queue: {}", queue.to_string()); // Output: 2 -> 3 -> 4
-
 
     // Queue-Methoden
     println!("Queue Größe: {}", queue.size());
@@ -106,13 +97,11 @@ fn main() {
     println!("Queue 1: {}", queue.to_string());
     println!("Queue 2: {}", another_queue.to_string());
     println!("Sind die beiden Queues gleich? {}", queue.equals(&another_queue));
-    
-   
+
     println!("===================================");
     println!("Linked List Tests");
     println!("===================================");
 
-   
     let mut list: LinkedList<i32> = LinkedList::new();
     println!("is_empty erster Aufruf: {}", list.is_empty());
     println!("is_empty zweiter Aufruf: {}", list.is_empty());
@@ -186,6 +175,4 @@ fn main() {
     // For no unused warnings
     queue.size();
     stack.peek();
-
-
 }

@@ -2,7 +2,7 @@ use crate::stack::Stack;
 use crate::datastructure::Datastructure;
 
 pub struct Queue<T> {
-    stack_in: Stack<T>,  // Stack für das Einfügen von Elementen
+    stack_in: Stack<T>, // Stack für das Einfügen von Elementen
     stack_out: Stack<T>, // Stack für das Entfernen von Elementen
 }
 
@@ -37,23 +37,14 @@ impl<T: PartialEq + std::fmt::Display> Queue<T> {
         if self.stack_out.is_empty() {
             while let Some(data) = self.stack_in.pop() {
                 self.stack_out.push(data);
-            }   
+            }
         }
-        self.stack_out.peek()  
+        self.stack_out.peek()
     }
-
-        
 }
 
-    
-
-
 // Implementierung des Datastructure-Traits für Queue
-impl<T> Datastructure<T> for Queue<T> 
-where 
-    T: PartialEq + ToString + std::fmt::Display + ,
-{
-
+impl<T> Datastructure<T> for Queue<T> where T: PartialEq + ToString + std::fmt::Display {
     // Gibt die Queue als String zurück
     fn to_string(&self) -> String {
         let mut result = String::new();
@@ -86,8 +77,6 @@ where
         result
     }
 
-    
-
     // Überprüft, ob die Queue leer ist
     fn is_empty(&self) -> bool {
         self.stack_in.is_empty() && self.stack_out.is_empty()
@@ -97,9 +86,7 @@ where
     fn size(&self) -> i32 {
         self.stack_in.size() + self.stack_out.size()
     }
-
-    
-} 
+}
 
 // ------------------------------Testing--------------------------------
 
@@ -128,31 +115,31 @@ mod tests {
     #[test]
     fn test_enqueue_dequeue() {
         let mut queue = Queue::new();
-        
+
         queue.enqueue(10);
         queue.enqueue(20);
         queue.enqueue(30);
 
         assert_eq!(queue.size(), 3);
-        
+
         assert_eq!(queue.dequeue(), Some(10));
         assert_eq!(queue.dequeue(), Some(20));
         assert_eq!(queue.dequeue(), Some(30));
-        
+
         assert!(queue.is_empty());
     }
 
     #[test]
     fn test_size_after_operations() {
         let mut queue = Queue::new();
-        
+
         queue.enqueue(40);
         queue.enqueue(50);
         assert_eq!(queue.size(), 2);
-        
+
         queue.dequeue();
         assert_eq!(queue.size(), 1);
-        
+
         queue.dequeue();
         assert_eq!(queue.size(), 0);
 
@@ -162,7 +149,7 @@ mod tests {
     #[test]
     fn test_to_string() {
         let mut queue = Queue::new();
-        
+
         queue.enqueue(120);
         queue.enqueue(110);
         queue.enqueue(100);
@@ -175,14 +162,14 @@ mod tests {
     fn test_equals() {
         let mut queue1 = Queue::new();
         let mut queue2 = Queue::new();
-        
+
         queue1.enqueue(1);
         queue1.enqueue(2);
         queue2.enqueue(1);
         queue2.enqueue(2);
-        
+
         assert!(queue1.equals(&queue2));
-        
+
         queue2.enqueue(3);
         assert!(!queue1.equals(&queue2));
     }
