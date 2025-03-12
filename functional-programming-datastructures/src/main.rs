@@ -1,9 +1,10 @@
-
+mod datastructures;
+use crate::datastructures::Datastructure;
 mod queue;
+use std::collections::VecDeque;
 use queue::Queue;
+mod list;
 
-mod datastructure;
-use crate::datastructure::Datastructure;
 
 fn main() {
     println!("===================================");

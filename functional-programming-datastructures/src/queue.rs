@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
-use crate::datastructure::Datastructure;
+use crate::datastructures::Datastructure;
+
 
 
 pub struct Queue<T> {
@@ -13,7 +14,7 @@ impl<T> Queue<T> {
         }
     }
 
-    pub fn enque(&mut self, value: T) {
+    pub fn enqueue(&mut self, value: T) {
         self.data.push_back(value);
     }
 
@@ -50,7 +51,7 @@ impl<T> Datastructure<T> for Queue<T> where T: PartialEq + ToString + std::fmt::
     }
 
     // Gibt die Größe der Queue zurück
-    fn size(&self) -> i32 {
+    fn size(&self) -> usize {
         self.data.len()
     }
 }
