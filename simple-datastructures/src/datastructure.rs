@@ -5,7 +5,7 @@ pub trait Datastructure<T> {
         !self.is_empty()
     }
 
-    fn size(&self) -> usize;
+    fn size(&self) -> i32;
 
     fn equals(&self, other: &Self) -> bool {
         self.to_string() == other.to_string()

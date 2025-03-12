@@ -72,18 +72,31 @@ fn main() {
     println!("===================================");
 
     let mut queue = Queue::new();
-    queue.enqueue_front(1);
-    queue.enqueue_back(2);
-    queue.enqueue_front(0);
+    queue.enqueue(1);
+    queue.enqueue(2);
+    queue.enqueue(3);
 
-    queue.is_empty();
-    queue.is_full();
-    queue.size();
-    queue.dequeue_back();
-    queue.dequeue_front();
+    println!("Queue: {}", queue.to_string()); // Output: ältestes 3 -> 2 -> 1 neuste
 
-    // Aufruf der benutzerdefinierten to_string Methode
-    println!("{}", queue.to_string()); // Gibt "[0, 1, 2]" aus
+    println!("Dequeue: {:?}", queue.dequeue().unwrap()); // Output: Some(1)
+    println!("Queue: {}", queue.to_string()); // Output: neuste 2 -> 3 älteste weil stack in stack out
+
+    queue.enqueue(4);
+    println!("Queue: {}", queue.to_string()); // Output: 2 -> 3 -> 4
+
+    // Queue-Methoden
+    println!("Queue Größe: {}", queue.size());
+    println!("Ist die Queue leer? {}", queue.is_empty());
+    println!("Ist die Queue voll? {}", queue.is_full());
+    println!("Was ist das oberste Element? {:?}", queue.peek().unwrap());
+
+    // Erstellen eines weitere Queue und vergleichen
+    let mut another_queue = Queue::new();
+    another_queue.enqueue(20);
+    another_queue.enqueue(10);
+    println!("Queue 1: {}", queue.to_string());
+    println!("Queue 2: {}", another_queue.to_string());
+    println!("Sind die beiden Queues gleich? {}", queue.equals(&another_queue));
 
     println!("===================================");
     println!("Linked List Tests");

@@ -205,7 +205,7 @@ impl<T> Datastructure<T> for LinkedList<T> where T: std::fmt::Display + PartialE
     }
 
     /// Gibt die Anzahl der Elemente in der Liste zurück
-    fn size(&self) -> usize {
+    fn size(&self) -> i32 {
         let mut count = 0;
         let mut current = self.head.as_ref();
         while let Some(node) = current {
