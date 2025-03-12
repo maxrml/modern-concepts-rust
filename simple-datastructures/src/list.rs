@@ -7,7 +7,7 @@ pub struct Node<T> {
 }
 
 impl<T> Node<T> {
-    #[allow(dead_code)]
+    #[allow(dead_code)] // avoid warning
     pub fn new(content: T) -> Self {
         Node {
             content,
@@ -20,9 +20,9 @@ pub struct LinkedList<T> {
     pub head: Option<Box<Node<T>>>,
 }
 
-
+// Implementierung Fkt ohne Trait
 impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> { // Display ist für eine angenehm formatierte Ausgabe
-    /// Erzeugt eine neue leere Liste.
+    /// Erzeugt eine neue leere Liste (Konstruktor)
     pub fn new() -> Self {
         LinkedList { head: None }
     }
@@ -33,7 +33,7 @@ impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> { // Display ist fü
             Some(node) => node,
             None => return,
         };
-        for _ in 0..index {
+        for _ in 0..index { // von 0 bis Index
             if let Some(next) = current.next.as_mut() {
                 current = next;
             } else {
@@ -46,6 +46,7 @@ impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> { // Display ist fü
 
     /// Fügt ein neues Element an der angegebenen Stelle ein
     pub fn insert(&mut self, index: usize, element: T) {
+        // Wenn index 0 Aufruf der add_first Funktion
         if index == 0 {
             self.add_first(element);
             return;

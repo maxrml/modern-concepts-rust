@@ -44,6 +44,9 @@ fn main() {
     let mut another_stack = Stack::new();
     another_stack.push(20);
     another_stack.push(10);
+
+    println!("Stack zu vergleichen: {}", stack.to_string());
+    println!("another_stack nach Pop: {}", another_stack.to_string());
     
     println!("Sind die beiden Stacks gleich? {}", stack.equals(&another_stack));
 
@@ -51,6 +54,7 @@ fn main() {
     let mut more_stack: Stack<i32> = Stack::new();
     more_stack.push_all(vec![1, 2, 3, 4, 5]);
     println!("Oberster Wert im Stack: {}", more_stack.peek().unwrap());
+    println!("Vector Stack: {}", stack.to_string());
 
 
     // komplexe Datentypen Array
@@ -80,10 +84,10 @@ fn main() {
     queue.enqueue(2);
     queue.enqueue(3);
     
-    println!("Queue: {}", queue.to_string()); // Output: 1 -> 2 -> 3
+    println!("Queue: {}", queue.to_string()); // Output: ältestes 3 -> 2 -> 1 neuste
 
-    println!("Dequeue: {:?}", queue.dequeue()); // Output: Some(1)
-    println!("Queue: {}", queue.to_string()); // Output: 2 -> 3
+    println!("Dequeue: {:?}", queue.dequeue().unwrap()); // Output: Some(1)
+    println!("Queue: {}", queue.to_string()); // Output: neuste 2 -> 3 älteste weil stack in stack out
 
     queue.enqueue(4);
     println!("Queue: {}", queue.to_string()); // Output: 2 -> 3 -> 4
@@ -93,7 +97,7 @@ fn main() {
     println!("Queue Größe: {}", queue.size());
     println!("Ist die Queue leer? {}", queue.is_empty());
     println!("Ist die Queue voll? {}", queue.is_full());
-    println!("Was ist das oberste Element? {:?}", queue.peek());
+    println!("Was ist das oberste Element? {:?}", queue.peek().unwrap());
 
     // Erstellen eines weitere Queue und vergleichen
     let mut another_queue = Queue::new();
@@ -130,8 +134,8 @@ fn main() {
     println!("size zweiter Aufruf: {}", list.size());
 
     // Test: content (2-mal; hier für Index 0 und 1)
-    println!("content an Index 0: {:?}", list.content(0));
-    println!("content an Index 1: {:?}", list.content(1));
+    println!("content an Index 0: {:?}", list.content(0).unwrap());
+    println!("content an Index 1: {:?}", list.content(1).unwrap());
 
     // Test: replace (2-mal)
     list.replace(1, 15);

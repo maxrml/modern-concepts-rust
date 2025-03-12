@@ -107,7 +107,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::*; // Stack nutzbar machen, da tests eigenes mod
 
     #[test]
     fn test_new_stack() {
