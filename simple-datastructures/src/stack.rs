@@ -81,8 +81,8 @@ impl<T> Datastructure<T> for Stack<T> where T: PartialEq + ToString + std::fmt::
         self.length == 0
     }
 
-    fn size(&self) -> i32 {
-        self.length
+    fn size(&self) -> usize {
+        self.length as usize
     }
 }
 
