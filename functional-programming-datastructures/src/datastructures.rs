@@ -12,4 +12,12 @@ pub trait Datastructure<T> {
     }
 
     fn to_string(&self) -> String;
+
+    fn map<U, F, D>(&self, f: F, target: D) -> D
+    where
+        F: FnMut(&T) -> U,
+        D: Datastructure<U>;
+
+    fn insert(&mut self, value: T);
+
 }
