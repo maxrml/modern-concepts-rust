@@ -18,6 +18,19 @@ pub trait Datastructure<T> {
         F: FnMut(&T) -> U,
         D: Datastructure<U>;
 
+    fn filter<F, D>(&self, f: F, target: D) -> D
+    where
+        F: Fn(&T) -> bool,
+        D: Datastructure<T>;
+
+    fn for_each<F>(&self, f: F)
+    where
+        F: Fn(&T);
+
+    fn reduce<U, F>(&self, f: F, initial: U) -> U
+    where
+         F: Fn(U, &T) -> U;
+
     fn insert(&mut self, value: T);
 
 }

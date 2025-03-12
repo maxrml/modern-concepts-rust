@@ -38,7 +38,7 @@ impl<T> LinkedListDS<T> {
 }
 
 // Implementierung des Datastructure-Traits für LinkedListDS
-impl<T> Datastructure<T> for LinkedListDS<T> where T: PartialEq + ToString + std::fmt::Display {
+impl<T> Datastructure<T> for LinkedListDS<T> where T: PartialEq + ToString + std::fmt::Display + Clone {
     fn to_string(&self) -> String 
     where T: std::fmt::Display {
         let mut result = String::from("[");
@@ -76,6 +76,40 @@ impl<T> Datastructure<T> for LinkedListDS<T> where T: PartialEq + ToString + std
             new_target.insert(transformed);
         }
         new_target
+    }
+
+    fn filter<F, D>(&self, f: F, target: D) -> D
+    where
+        F: Fn(&T) -> bool,
+        D: Datastructure<T>,
+    {
+        let mut new_target = target;
+        for item in &self.data {
+            if f(item) {
+                new_target.insert(item.clone());
+            }
+        }
+        new_target
+    }
+
+    fn for_each<F>(&self, f: F)
+    where
+        F: Fn(&T),
+    {
+        for item in &self.data {
+            f(item);
+        }
+    }
+
+    fn reduce<U, F>(&self, f: F, initial: U) -> U
+    where
+        F: Fn(U, &T) -> U,
+    {
+        let mut acc = initial;
+        for item in &self.data {
+            acc = f(acc, item);
+        }
+        acc
     }
     
 }

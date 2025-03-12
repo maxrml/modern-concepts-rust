@@ -27,7 +27,7 @@ impl<T> Queue<T> {
 
 
 // Implementierung des Datastructure-Traits für Queue
-impl<T> Datastructure<T> for Queue<T> where T: PartialEq + ToString + std::fmt::Display {
+impl<T> Datastructure<T> for Queue<T> where T: PartialEq + ToString + std::fmt::Display + Clone {
     // Gibt die Queue als String zurück
     
     fn to_string(&self) -> String 
@@ -69,6 +69,40 @@ impl<T> Datastructure<T> for Queue<T> where T: PartialEq + ToString + std::fmt::
             new_target.insert(transformed);
         }
         new_target
+    }
+
+    fn filter<F, D>(&self, f: F, target: D) -> D
+    where
+        F: Fn(&T) -> bool,
+        D: Datastructure<T>,
+    {
+        let mut new_target = target;
+        for item in &self.data {
+            if f(item) {
+                new_target.insert(item.clone());
+            }
+        }
+        new_target
+    }
+
+    fn for_each<F>(&self, f: F)
+    where
+        F: Fn(&T),
+    {
+        for item in &self.data {
+            f(item);
+        }
+    }
+
+    fn reduce<U, F>(&self, f: F, initial: U) -> U
+    where
+        F: Fn(U, &T) -> U,
+    {
+        let mut acc = initial;
+        for item in &self.data {
+            acc = f(acc, item);
+        }
+        acc
     }
     
 }
