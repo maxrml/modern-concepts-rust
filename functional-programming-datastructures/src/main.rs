@@ -9,6 +9,9 @@ use std::collections::LinkedList;
 mod stack;
 use std::vec::Vec;
 use stack::Stack;
+mod lazy_evaluation;
+use lazy_evaluation::Lazy;
+mod order;
 
 
 fn main() {
@@ -80,5 +83,17 @@ fn main() {
     // Test filter (Nur Strings mit mehr als 5 Buchstaben)
     let long_words: LinkedListDS<String> = list.filter(|x| x.len() > 5, LinkedListDS::new());
     println!("Lange Wörter in LinkedList: {}", long_words.to_string());
+
+    // Tests for lazy evaluation
+    let mut stack = Stack::new();
+    stack.push(1);
+    stack.push(2);
+    stack.push(3);
+    stack.push(4);
+
+    let mut lazy_stack = Lazy::new(stack, |x| *x % 2 == 0);
+    while let Some(item) = lazy_stack.next() {
+        println!("Gefiltert aus Stack: {}", item);
+    }
 
 }

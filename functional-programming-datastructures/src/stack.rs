@@ -1,4 +1,5 @@
 use std::vec::Vec;
+use crate::order::Order;
 use crate::datastructures::Datastructure;
 
 pub struct Stack<T> {
@@ -102,4 +103,10 @@ impl<T> Datastructure<T> for Stack<T> where T: PartialEq + ToString + std::fmt::
         self.push(value); // `insert` nutzt einfach `push`
     }
     
+}
+
+impl<T> Order<T> for Stack<T> {
+    fn next(&mut self) -> Option<T> {
+        self.data.pop()
+    }
 }
