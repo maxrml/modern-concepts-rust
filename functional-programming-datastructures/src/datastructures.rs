@@ -31,6 +31,10 @@ pub trait Datastructure<T> {
     where
          F: Fn(U, &T) -> U;
 
-    fn insert(&mut self, value: T);
+    fn reduce_right<U, F>(&self, f: F, initial: U) -> U
+    where
+         F: FnMut(U, &T) -> U;
 
+    fn insert(&mut self, value: T);
+    
 }

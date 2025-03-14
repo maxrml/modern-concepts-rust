@@ -37,7 +37,6 @@ impl<T> LinkedListDS<T> {
     }
 }
 
-// Implementierung des Datastructure-Traits für LinkedListDS
 impl<T> Datastructure<T> for LinkedListDS<T> where T: PartialEq + ToString + std::fmt::Display + Clone {
     fn to_string(&self) -> String 
     where T: std::fmt::Display {
@@ -64,7 +63,6 @@ impl<T> Datastructure<T> for LinkedListDS<T> where T: PartialEq + ToString + std
         self.push_back(value);
     }
 
-    // Wendet eine Funktion auf alle Elemente an und speichert sie in der Zieldatenstruktur
     fn map<U, F, D>(&self, mut f: F, target: D) -> D
     where
         F: FnMut(&T) -> U,
@@ -72,7 +70,7 @@ impl<T> Datastructure<T> for LinkedListDS<T> where T: PartialEq + ToString + std
     {
         let mut new_target = target;
         for item in &self.data {
-            let transformed = f(item); // Hier wird `f` als mutabel genutzt
+            let transformed = f(item);
             new_target.insert(transformed);
         }
         new_target
@@ -111,5 +109,17 @@ impl<T> Datastructure<T> for LinkedListDS<T> where T: PartialEq + ToString + std
         }
         acc
     }
-    
+
+    fn reduce_right<U, F>(&self, mut f: F, initial: U) -> U
+    where
+        F: FnMut(U, &T) -> U,
+    {
+        let mut acc = initial;
+        let mut iter = self.data.iter().rev(); 
+
+        for item in iter {
+            acc = f(acc, item);
+        }
+        acc
+    }
 }

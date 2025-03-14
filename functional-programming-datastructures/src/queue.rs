@@ -13,11 +13,11 @@ impl<T> Queue<T> {
     }
 
     pub fn enqueue(&mut self, value: T) {
-        self.data.push_back(value);
+        self.data.push_front(value);
     }
 
     pub fn dequeue(&mut self) -> Option<T> {
-        self.data.pop_front()
+        self.data.pop_back()
     }
 
     pub fn get(&self, index: usize) -> Option<&T> {
@@ -26,10 +26,8 @@ impl<T> Queue<T> {
 }
 
 
-// Implementierung des Datastructure-Traits für Queue
 impl<T> Datastructure<T> for Queue<T> where T: PartialEq + ToString + std::fmt::Display + Clone {
-    // Gibt die Queue als String zurück
-    
+
     fn to_string(&self) -> String 
     where T: std::fmt::Display {
         let mut result = String::from("[");
@@ -43,21 +41,18 @@ impl<T> Datastructure<T> for Queue<T> where T: PartialEq + ToString + std::fmt::
         result
     }
 
-    // Überprüft, ob die Queue leer ist
     fn is_empty(&self) -> bool {
         self.data.is_empty()
     }
 
-    // Gibt die Größe der Queue zurück
     fn size(&self) -> usize {
         self.data.len()
     }
-    // Fügt ein Element in die Queue ein (am Ende)
+
     fn insert(&mut self, value: T) {
-        self.enqueue(value); // Nutzt die bestehende `enqueue`-Methode
+        self.enqueue(value); 
     }
 
-    // Wendet eine Funktion auf alle Elemente an und speichert sie in der Zieldatenstruktur
     fn map<U, F, D>(&self, mut f: F, target: D) -> D
     where
         F: FnMut(&T) -> U,
@@ -65,7 +60,7 @@ impl<T> Datastructure<T> for Queue<T> where T: PartialEq + ToString + std::fmt::
     {
         let mut new_target = target;
         for item in &self.data {
-            let transformed = f(item); // Hier wird `f` als mutabel genutzt
+            let transformed = f(item); 
             new_target.insert(transformed);
         }
         new_target
@@ -101,6 +96,18 @@ impl<T> Datastructure<T> for Queue<T> where T: PartialEq + ToString + std::fmt::
         let mut acc = initial;
         for item in &self.data {
             acc = f(acc, item);
+        }
+        acc
+    }
+    fn reduce_right<U, F>(&self, mut f: F, initial: U) -> U
+    where
+        F: FnMut(U, &T) -> U,
+    {
+        let mut acc = initial;
+        let len = self.data.len();
+
+        for i in (0..len).rev() { // Rückwärts über Indizes iterieren
+            acc = f(acc, &self.data[i]);
         }
         acc
     }
