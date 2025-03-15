@@ -1,6 +1,7 @@
 use std::vec::Vec;
 use crate::order::Order;
 use crate::datastructures::Datastructure;
+use crate::lazy_evaluation::Lazy;
 
 pub struct Stack<T> {
     data: Vec<T>,
@@ -24,11 +25,21 @@ impl<T> Stack<T> {
     pub fn peek(&self) -> Option<&T> {
         self.data.last()
     }
-    
+}
+
+// Implementierung des Order-Traits für Stack
+impl<T> Order<T> for Stack<T> {
+    fn next(&mut self) -> Option<T> {
+        self.pop()
+    }
 }
 
 // Implementierung des Datastructure-Traits für Stack
-impl<T> Datastructure<T> for Stack<T> where T: PartialEq + ToString + std::fmt::Display + Clone {
+// Hier fügen wir 'static zu T hinzu, um das Lifetime-Problem zu lösen
+impl<T: 'static> Datastructure<T> for Stack<T> 
+where 
+    T: PartialEq + ToString + std::fmt::Display + Clone
+{
     // Gibt den Stack als String zurück
     fn to_string(&self) -> String 
     where T: std::fmt::Display {
@@ -52,14 +63,15 @@ impl<T> Datastructure<T> for Stack<T> where T: PartialEq + ToString + std::fmt::
     fn size(&self) -> usize {
         self.data.len()
     }
-    fn map<U, F, D>(&self, mut f: F, target: D) -> D
+    
+    fn map<U: 'static, F, D>(&self, mut f: F, target: D) -> D
     where
         F: FnMut(&T) -> U,
         D: Datastructure<U>,
     {
         let mut new_target = target;
         for item in &self.data {
-            let transformed = f(item); // Hier wird `f` als mutabel genutzt
+            let transformed = f(item);
             new_target.insert(transformed);
         }
         new_target
@@ -100,13 +112,36 @@ impl<T> Datastructure<T> for Stack<T> where T: PartialEq + ToString + std::fmt::
     }
 
     fn insert(&mut self, value: T) {
-        self.push(value); // `insert` nutzt einfach `push`
+        self.push(value);
+    }
+
+    fn lazy_filter<F>(&self, f: F) -> Lazy<Box<dyn Order<T>>, F, T, T>
+    where
+        F: Fn(&T) -> bool + 'static,
+    {
+        // Erstellen einer Kopie des Stacks, um die Originaldaten nicht zu verändern
+        let mut stack_copy = Stack::new();
+        for item in &self.data {
+            stack_copy.push(item.clone());
+        }
+        
+        // Stack in eine Box verpacken, um ihn als Trait-Objekt zu nutzen
+        let boxed_order: Box<dyn Order<T>> = Box::new(stack_copy);
+        Lazy::new_filter(boxed_order, f)
     }
     
-}
-
-impl<T> Order<T> for Stack<T> {
-    fn next(&mut self) -> Option<T> {
-        self.data.pop()
+    fn lazy_map<F, U: 'static>(&self, f: F) -> Lazy<Box<dyn Order<T>>, F, T, U>
+    where
+        F: FnMut(&T) -> U + 'static,
+    {
+        // Erstellen einer Kopie des Stacks, um die Originaldaten nicht zu verändern
+        let mut stack_copy = Stack::new();
+        for item in &self.data {
+            stack_copy.push(item.clone());
+        }
+        
+        // Stack in eine Box verpacken, um ihn als Trait-Objekt zu nutzen
+        let boxed_order: Box<dyn Order<T>> = Box::new(stack_copy);
+        Lazy::new_map(boxed_order, f)
     }
 }

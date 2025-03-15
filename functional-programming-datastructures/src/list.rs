@@ -111,5 +111,4 @@ impl<T> Datastructure<T> for LinkedListDS<T> where T: PartialEq + ToString + std
         }
         acc
     }
-    
 }

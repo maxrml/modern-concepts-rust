@@ -1,28 +1,56 @@
+use std::marker::PhantomData;
 use crate::order::Order;
-pub struct Lazy<S, P, T> {
+
+pub struct Lazy<S, F, T, U> {
     order: S,
-    predicate: P,
-    _marker: std::marker::PhantomData<T>,
+    function: F,
+    _marker_t: PhantomData<T>,
+    _marker_u: PhantomData<U>,
 }
 
-impl<S, P, T> Lazy<S, P, T>
+// Implementierung für Filter-Operationen
+impl<S, P, T> Lazy<S, P, T, T>
 where
     S: Order<T>,
     P: Fn(&T) -> bool,
 {
-    pub fn new(order: S, predicate: P) -> Self {
+    pub fn new_filter(order: S, predicate: P) -> Self {
         Lazy {
             order,
-            predicate,
-            _marker: std::marker::PhantomData,
+            function: predicate,
+            _marker_t: PhantomData,
+            _marker_u: PhantomData,
         }
     }
 
-    pub fn next(&mut self) -> Option<T> {
+    pub fn next_filter(&mut self) -> Option<T> {
         while let Some(item) = self.order.next() {
-            if (self.predicate)(&item) {
+            if (self.function)(&item) {
                 return Some(item);
             }
+        }
+        None
+    }
+}
+
+// Implementierung für Map-Operationen
+impl<S, F, T, U> Lazy<S, F, T, U>
+where
+    S: Order<T>,
+    F: FnMut(&T) -> U,
+{
+    pub fn new_map(order: S, transform: F) -> Self {
+        Lazy {
+            order,
+            function: transform,
+            _marker_t: PhantomData,
+            _marker_u: PhantomData,
+        }
+    }
+
+    pub fn next_map(&mut self) -> Option<U> {
+        if let Some(item) = self.order.next() {
+            return Some((self.function)(&item));
         }
         None
     }
