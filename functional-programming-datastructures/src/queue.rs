@@ -11,6 +11,26 @@ impl<T> Queue<T> {
             data: VecDeque::new(),
         }
     }
+    pub fn iter(&self) -> QueueIter<T> {
+        QueueIter {
+            queue: self,
+            index: 0,
+        }
+    }
+
+    pub fn lazy_map<'a, U, F>(&'a self, f: F) -> impl Iterator<Item = U> + 'a
+    where
+        F: Fn(&T) -> U + 'a,
+    {
+        self.iter().map(f)
+    }
+
+    pub fn lazy_filter<'a, F>(&'a self, mut f: F) -> impl Iterator<Item = &T> + 'a
+    where
+        F: FnMut(&T) -> bool + 'a, 
+    {
+        self.iter().filter(move |x| f(x))
+    }
 
     pub fn enqueue(&mut self, value: T) {
         self.data.push_front(value);
@@ -106,10 +126,29 @@ impl<T> Datastructure<T> for Queue<T> where T: PartialEq + ToString + std::fmt::
         let mut acc = initial;
         let len = self.data.len();
 
-        for i in (0..len).rev() { // Rückwärts über Indizes iterieren
+        for i in (0..len).rev() { 
             acc = f(acc, &self.data[i]);
         }
         acc
     }
     
+}
+
+pub struct QueueIter<'a, T> {
+    queue: &'a Queue<T>,
+    index: usize,
+}
+
+impl<'a, T> Iterator for QueueIter<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index < self.queue.data.len() {
+            let result = self.queue.data.get(self.index);
+            self.index += 1;
+            result
+        } else {
+            None
+        }
+    }
 }

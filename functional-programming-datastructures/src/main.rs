@@ -11,51 +11,74 @@ use std::vec::Vec;
 use stack::Stack;
 
 
+
 fn main() {
-    
-    // Stack erstellen und Werte hinzufügen
     let mut stack = Stack::new();
-    stack.push(10);
-    stack.push(20);
-    stack.push(30);
+    stack.push(1);
+    stack.push(2);
+    stack.push(3);
+    stack.push(4);
+    stack.push(5);
 
-    // Stack als String ausgeben
-    println!("Stack: {}", stack.to_string());
+    println!("Originaler Stack: {}", stack.to_string());
 
-    // Teste is_empty() und size()
-    println!("Ist der Stack leer? {}", stack.is_empty());
-    println!("Größe des Stacks: {}", stack.size());
-
-    // Peek (oberstes Element)
-    if let Some(top) = stack.peek() {
-        println!("Oberstes Element: {}", top);
+    println!("Stack mit lazy_map verdoppelt:");
+    let mut mapped_stack = stack.lazy_map(|x| x * 2);
+    while let Some(val) = mapped_stack.next() {
+        print!("{} ", val);
     }
+    println!();
 
-    // Pop (oberstes Element entfernen)
-    if let Some(popped) = stack.pop() {
-        println!("Entferntes Element: {}", popped);
+    println!("Stack mit lazy_filter (nur gerade Zahlen):");
+    let mut filtered_stack = stack.lazy_filter(|x| x % 2 == 0);
+    while let Some(val) = filtered_stack.next() {
+        print!("{} ", val);
     }
+    println!();
 
-    println!("Stack nach pop: {}", stack.to_string());
+    let mut queue = Queue::new();
+    queue.enqueue(10);
+    queue.enqueue(15);
+    queue.enqueue(20);
+    queue.enqueue(25);
+    queue.enqueue(30);
 
-    // map: Verdoppele alle Werte
-    let doubled_stack = stack.map(|x| x * 2, Stack::new());
-    println!("Verdoppelter Stack: {}", doubled_stack.to_string());
+    println!("\nOriginale Queue: {:?}", queue.to_string());
 
-    // filter: Nur Werte > 15 behalten
-    let filtered_stack = stack.filter(|x| *x > 15, Stack::new());
-    println!("Gefilterter Stack (>15): {}", filtered_stack.to_string());
+    println!("Queue mit lazy_map quadriert:");
+    let mut mapped_queue = queue.lazy_map(|x| x * x);
+    while let Some(val) = mapped_queue.next() {
+        print!("{} ", val);
+    }
+    println!();
 
-    // for_each: Alle Werte ausgeben
-    println!("Alle Elemente ausgeben:");
-    stack.for_each(|x| println!("{}", x));
+    println!("Queue mit lazy_filter (nur > 20):");
+    let mut filtered_queue = queue.lazy_filter(|&x| x > 20);
+    while let Some(val) = filtered_queue.next() {
+        print!("{} ", val);
+    }
+    println!();
 
-    // reduce: Summe aller Werte berechnen
-    let sum = stack.reduce(|acc, x| acc + x, 0);
-    println!("Summe aller Elemente: {}", sum);
+    let mut list = LinkedListDS::new();
+    list.push_back(100);
+    list.push_back(200);
+    list.push_back(300);
+    list.push_back(400);
+    list.push_back(500);
 
-    // reduce_right: Subtraktion von rechts nach links
-    let diff = stack.reduce_right(|acc, x| acc - x, 100);
-    println!("Ergebnis von reduce_right: {}", diff);
+    println!("\nOriginale LinkedList: {}", list.to_string());
 
+    println!("LinkedList mit lazy_map halbiert:");
+    let mut mapped_list = list.lazy_map(|x| x / 2);
+    while let Some(val) = mapped_list.next() {
+        print!("{} ", val);
+    }
+    println!();
+
+    println!("LinkedList mit lazy_filter (>= 300):");
+    let mut filtered_list = list.lazy_filter(|&x| x >= 300);
+    while let Some(val) = filtered_list.next() {
+        print!("{} ", val);
+    }
+    println!();
 }

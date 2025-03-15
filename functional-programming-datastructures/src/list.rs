@@ -11,6 +11,25 @@ impl<T> LinkedListDS<T> {
             data: LinkedList::new(),
         }
     }
+    pub fn iter(&self) -> LinkedListIter<T> {
+        LinkedListIter {
+            iter: self.data.iter(),
+        }
+    }
+
+    pub fn lazy_map<'a, U, F>(&'a self, f: F) -> impl Iterator<Item = U> + 'a
+    where
+        F: Fn(&T) -> U + 'a,
+    {
+        self.iter().map(f)
+    }
+
+    pub fn lazy_filter<'a, F>(&'a self, mut f: F) -> impl Iterator<Item = &T> + 'a
+    where
+        F: FnMut(&T) -> bool + 'a,  
+    {
+        self.iter().filter(move |x| f(x))
+    }
 
     pub fn push_front(&mut self, value: T) {
         self.data.push_front(value);
@@ -121,5 +140,17 @@ impl<T> Datastructure<T> for LinkedListDS<T> where T: PartialEq + ToString + std
             acc = f(acc, item);
         }
         acc
+    }
+}
+
+pub struct LinkedListIter<'a, T> {
+    iter: std::collections::linked_list::Iter<'a, T>,
+}
+
+impl<'a, T> Iterator for LinkedListIter<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next()
     }
 }

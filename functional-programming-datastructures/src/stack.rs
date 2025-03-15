@@ -11,6 +11,26 @@ impl<T> Stack<T> {
             data: Vec::new(),
         }
     }
+    pub fn iter(&self) -> StackIter<T> {
+        StackIter {
+            stack: self,
+            index: 0,
+        }
+    }
+
+    pub fn lazy_map<'a, U, F>(&'a self, f: F) -> impl Iterator<Item = U> + 'a
+    where
+        F: Fn(&T) -> U + 'a,
+    {
+        self.iter().map(f)
+    }
+
+    pub fn lazy_filter<'a, F>(&'a self, mut f: F) -> impl Iterator<Item = &T> + 'a
+    where
+        F: FnMut(&T) -> bool + 'a,  
+    {
+        self.iter().filter(move |x| f(x))
+    }
 
     pub fn push(&mut self, value: T) {
         self.data.push(value);
@@ -25,6 +45,7 @@ impl<T> Stack<T> {
     }
 
 }
+
 
 impl<T> Datastructure<T> for Stack<T> where T: PartialEq + ToString + std::fmt::Display + Clone {
 
@@ -113,5 +134,25 @@ impl<T> Datastructure<T> for Stack<T> where T: PartialEq + ToString + std::fmt::
         }
         acc 
     }
+
     
+}
+
+pub struct StackIter<'a, T> {
+    stack: &'a Stack<T>,
+    index: usize,
+}
+
+impl<'a, T> Iterator for StackIter<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index < self.stack.data.len() {
+            let result = &self.stack.data[self.index];
+            self.index += 1;
+            Some(result)
+        } else {
+            None
+        }
+    }
 }
