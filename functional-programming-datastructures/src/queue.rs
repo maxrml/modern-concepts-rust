@@ -1,5 +1,7 @@
 use std::collections::VecDeque;
 use crate::datastructures::Datastructure;
+use crate::order::Order;
+use crate::lazy_evaluation::Lazy;
 
 pub struct Queue<T> {
     data: VecDeque<T>,
@@ -25,11 +27,19 @@ impl<T> Queue<T> {
     }  
 }
 
+// Implementieren des Order-Traits für Queue
+impl<T> Order<T> for Queue<T> {
+    fn next(&mut self) -> Option<T> {
+        self.dequeue()
+    }
+}
 
 // Implementierung des Datastructure-Traits für Queue
-impl<T> Datastructure<T> for Queue<T> where T: PartialEq + ToString + std::fmt::Display + Clone {
+impl<T: 'static> Datastructure<T> for Queue<T> 
+where 
+    T: PartialEq + ToString + std::fmt::Display + Clone 
+{
     // Gibt die Queue als String zurück
-    
     fn to_string(&self) -> String 
     where T: std::fmt::Display {
         let mut result = String::from("[");
@@ -52,13 +62,14 @@ impl<T> Datastructure<T> for Queue<T> where T: PartialEq + ToString + std::fmt::
     fn size(&self) -> usize {
         self.data.len()
     }
+    
     // Fügt ein Element in die Queue ein (am Ende)
     fn insert(&mut self, value: T) {
         self.enqueue(value); // Nutzt die bestehende `enqueue`-Methode
     }
 
     // Wendet eine Funktion auf alle Elemente an und speichert sie in der Zieldatenstruktur
-    fn map<U, F, D>(&self, mut f: F, target: D) -> D
+    fn map<U: 'static, F, D>(&self, mut f: F, target: D) -> D
     where
         F: FnMut(&T) -> U,
         D: Datastructure<U>,
@@ -105,4 +116,35 @@ impl<T> Datastructure<T> for Queue<T> where T: PartialEq + ToString + std::fmt::
         acc
     }
     
+    // Implementierung der lazy_filter Methode
+    fn lazy_filter<F>(&self, f: F) -> Lazy<Box<dyn Order<T>>, F, T, T>
+    where
+        F: Fn(&T) -> bool + 'static,
+    {
+        // Erstellen einer Kopie der Queue, um die Originaldaten nicht zu verändern
+        let mut queue_copy = Queue::new();
+        for item in &self.data {
+            queue_copy.enqueue(item.clone());
+        }
+        
+        // Queue in eine Box verpacken, um sie als Trait-Objekt zu nutzen
+        let boxed_order: Box<dyn Order<T>> = Box::new(queue_copy);
+        Lazy::new_filter(boxed_order, f)
+    }
+    
+    // Implementierung der lazy_map Methode
+    fn lazy_map<F, U: 'static>(&self, f: F) -> Lazy<Box<dyn Order<T>>, F, T, U>
+    where
+        F: FnMut(&T) -> U + 'static,
+    {
+        // Erstellen einer Kopie der Queue, um die Originaldaten nicht zu verändern
+        let mut queue_copy = Queue::new();
+        for item in &self.data {
+            queue_copy.enqueue(item.clone());
+        }
+        
+        // Queue in eine Box verpacken, um sie als Trait-Objekt zu nutzen
+        let boxed_order: Box<dyn Order<T>> = Box::new(queue_copy);
+        Lazy::new_map(boxed_order, f)
+    }
 }

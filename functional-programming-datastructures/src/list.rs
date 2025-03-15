@@ -1,13 +1,15 @@
 use std::collections::LinkedList;
 use crate::datastructures::Datastructure;
+use crate::order::Order;
+use crate::lazy_evaluation::Lazy;
 
-pub struct LinkedListDS<T> {
+pub struct List<T> {
     data: LinkedList<T>,
 }
 
-impl<T> LinkedListDS<T> {
+impl<T> List<T> {
     pub fn new() -> Self {
-        LinkedListDS {
+        List {
             data: LinkedList::new(),
         }
     }
@@ -37,8 +39,18 @@ impl<T> LinkedListDS<T> {
     }
 }
 
-// Implementierung des Datastructure-Traits für LinkedListDS
-impl<T> Datastructure<T> for LinkedListDS<T> where T: PartialEq + ToString + std::fmt::Display + Clone {
+// Implementierung des Order-Traits für List
+impl<T> Order<T> for List<T> {
+    fn next(&mut self) -> Option<T> {
+        self.pop_front()
+    }
+}
+
+// Implementierung des Datastructure-Traits für List
+impl<T: 'static> Datastructure<T> for List<T> 
+where 
+    T: PartialEq + ToString + std::fmt::Display + Clone 
+{
     fn to_string(&self) -> String 
     where T: std::fmt::Display {
         let mut result = String::from("[");
@@ -64,16 +76,14 @@ impl<T> Datastructure<T> for LinkedListDS<T> where T: PartialEq + ToString + std
         self.push_back(value);
     }
 
-    // Wendet eine Funktion auf alle Elemente an und speichert sie in der Zieldatenstruktur
-    fn map<U, F, D>(&self, mut f: F, target: D) -> D
+    fn map<U: 'static, F, D>(&self, mut f: F, target: D) -> D
     where
         F: FnMut(&T) -> U,
         D: Datastructure<U>,
     {
         let mut new_target = target;
         for item in &self.data {
-            let transformed = f(item); // Hier wird `f` als mutabel genutzt
-            new_target.insert(transformed);
+            new_target.insert(f(item));
         }
         new_target
     }
@@ -110,5 +120,29 @@ impl<T> Datastructure<T> for LinkedListDS<T> where T: PartialEq + ToString + std
             acc = f(acc, item);
         }
         acc
+    }
+    
+    fn lazy_filter<F>(&self, f: F) -> Lazy<Box<dyn Order<T>>, F, T, T>
+    where
+        F: Fn(&T) -> bool + 'static,
+    {
+        let mut list_copy = List::new();
+        for item in &self.data {
+            list_copy.push_back(item.clone());
+        }
+        let boxed_order: Box<dyn Order<T>> = Box::new(list_copy);
+        Lazy::new_filter(boxed_order, f)
+    }
+    
+    fn lazy_map<F, U: 'static>(&self, f: F) -> Lazy<Box<dyn Order<T>>, F, T, U>
+    where
+        F: FnMut(&T) -> U + 'static,
+    {
+        let mut list_copy = List::new();
+        for item in &self.data {
+            list_copy.push_back(item.clone());
+        }
+        let boxed_order: Box<dyn Order<T>> = Box::new(list_copy);
+        Lazy::new_map(boxed_order, f)
     }
 }

@@ -4,7 +4,7 @@ mod queue;
 use std::collections::VecDeque;
 use queue::Queue;
 mod list;
-use list::LinkedListDS;
+use list::List;
 use std::collections::LinkedList;
 mod stack;
 use std::vec::Vec;
@@ -63,7 +63,7 @@ fn main() {
     println!("Gefilterte Queue (x > 15): {}", filtered_queue.to_string());
 
     println!("\n==== LinkedList Tests ====");
-    let mut list = LinkedListDS::new();
+    let mut list = List::new();
     list.push_back("Apfel".to_string());
     list.push_back("Banane".to_string());
     list.push_back("Kiwi".to_string());
@@ -73,7 +73,7 @@ fn main() {
     println!("Konkatenierte LinkedList: {}", concat_list.trim());
 
     // Test map (Strings in Großbuchstaben)
-    let uppercase_list: LinkedListDS<String> = list.map(|x| x.to_uppercase(), LinkedListDS::new());
+    let uppercase_list: List<String> = list.map(|x| x.to_uppercase(), List::new());
     println!("Großbuchstaben LinkedList: {}", uppercase_list.to_string());
 
     // Test forEach (Einzelnes Printen)
@@ -81,19 +81,8 @@ fn main() {
     list.for_each(|x| println!("{}", x));
 
     // Test filter (Nur Strings mit mehr als 5 Buchstaben)
-    let long_words: LinkedListDS<String> = list.filter(|x| x.len() > 5, LinkedListDS::new());
+    let long_words: List<String> = list.filter(|x| x.len() > 5, List::new());
     println!("Lange Wörter in LinkedList: {}", long_words.to_string());
 
     // Tests for lazy evaluation
-    let mut stack = Stack::new();
-    stack.push(1);
-    stack.push(2);
-    stack.push(3);
-    stack.push(4);
-
-    let mut lazy_stack = Lazy::new(stack, |x| *x % 2 == 0);
-    while let Some(item) = lazy_stack.next() {
-        println!("Gefiltert aus Stack: {}", item);
-    }
-
 }
