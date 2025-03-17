@@ -80,5 +80,7 @@ fn main() {
     while let Some(val) = filtered_list.next() {
         print!("{} ", val);
     }
+    
     println!();
 }
+

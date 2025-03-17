@@ -100,9 +100,9 @@ impl<T> Datastructure<T> for Queue<T> where T: PartialEq + ToString + std::fmt::
         new_target
     }
 
-    fn for_each<F>(&self, f: F)
+    fn for_each<F>(&self, mut f: F)
     where
-        F: Fn(&T),
+        F: FnMut(&T),
     {
         for item in &self.data {
             f(item);
@@ -152,3 +152,177 @@ impl<'a, T> Iterator for QueueIter<'a, T> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests{
+
+    use super::*;
+
+    #[test]
+    fn test_enqueue(){
+        let mut queue = Queue::new();
+        assert!(queue.is_empty());
+
+        queue.enqueue(1);
+        queue.enqueue(2);
+        assert_eq!(queue.size(), 2);
+        assert_eq!(queue.get(0), Some(&2));
+        assert_eq!(queue.get(1), Some(&1));
+    }
+
+    #[test]
+    fn test_dequeue(){
+        let mut queue= Queue::new();
+        assert!(queue.is_empty());
+
+        queue.enqueue(1);
+        queue.enqueue(2);
+        assert_eq!(queue.size(), 2);
+        queue.dequeue();
+        assert_eq!(queue.size(), 1);
+        assert_eq!(queue.dequeue(), Some(2));
+        assert!(queue.is_empty());
+    }
+
+    #[test]
+    fn test_map(){
+        let mut queue = Queue::new();
+        queue.enqueue(1);
+        queue.enqueue(2);
+        queue.enqueue(3);
+
+        let target_queue: Queue<i32> = Queue::new();
+        let result_queue = queue.map(|x| x * x, target_queue);
+        
+        assert_eq!(result_queue.get(0), Some(&1));
+        assert_eq!(result_queue.get(1), Some(&4));
+        assert_eq!(result_queue.get(2), Some(&9));
+
+    }
+    #[test]
+    fn test_lazy_map(){
+
+        let mut queue = Queue::new();
+        queue.enqueue(1);
+        queue.enqueue(2);
+        queue.enqueue(3);
+
+        let mapped_results : Vec<_> = queue.lazy_map(|&x| x * 2).collect();
+        assert_eq!(mapped_results, vec![6, 4, 2]);
+    }
+
+    #[test]
+    fn test_lazy_filter(){
+        let mut queue = Queue::new();
+        queue.enqueue(1);
+        queue.enqueue(2);
+        queue.enqueue(3);
+        queue.enqueue(4);
+        queue.enqueue(5);
+
+        let filtered_results: Vec<_> = queue.lazy_filter(|&x| x % 2 != 0).collect();
+        assert_eq!(filtered_results, vec![&5, &3, &1]);
+    }
+
+    #[test]
+    fn test_get(){
+        let mut queue = Queue::new();
+        queue.enqueue(1);
+        queue.enqueue(2);
+        queue.enqueue(3);
+
+        //Test get mit den gültigen Indexabfragen
+        assert_eq!(queue.get(0), Some(&3));
+        assert_eq!(queue.get(1), Some(&2));
+        assert_eq!(queue.get(2), Some(&1));
+
+        //Test get mit den ungültigen Indexabfragen
+        assert_eq!(queue.get(4), None);
+
+        //Test get mit empty queue
+        queue.dequeue();
+        queue.dequeue();
+        queue.dequeue();
+        assert_eq!(queue.get(0), None);
+
+    }
+
+    #[test]
+    fn test_filter(){
+        let mut queue = Queue::new();
+        queue.enqueue(1);
+        queue.enqueue(2);
+        queue.enqueue(3);
+        queue.enqueue(4);
+
+        let target_queue: Queue<i32> = Queue::new();
+        let result_queue = queue.filter(|x| x % 2 == 0, target_queue);
+        assert_eq!(result_queue.get(0), Some(&2));
+        assert_eq!(result_queue.get(1), Some(&4));
+
+    }
+    
+
+    #[test]
+    fn test_to_string() {
+        let mut queue = Queue::new();
+        queue.enqueue(1);
+        queue.enqueue(2);
+        queue.enqueue(3);
+        queue.enqueue(4);
+
+        let result_string = queue.to_string();
+        assert_eq!(result_string, "[4, 3, 2, 1]");
+    }
+
+    
+    #[test]
+    fn test_for_each_to_string() {
+    let mut queue = Queue::new();
+    queue.enqueue(1);
+    queue.enqueue(2);
+    queue.enqueue(3);
+    queue.enqueue(4);
+
+    let mut sum =0;
+        queue.for_each(|&x|{sum += x;});
+
+        assert_eq!(sum, 1 + 2 + 3 + 4);
+       
+    }
+    
+
+
+    #[test]
+    fn test_reduce(){
+        let mut queue = Queue::new();
+        queue.enqueue(1);
+        queue.enqueue(2);
+        queue.enqueue(3);
+
+        let sum = queue.reduce(|acc, &x| acc + x, 0);
+        assert_eq!(sum, 6);  
+
+        let result = queue.reduce(|acc, &x| format!("{} {}", acc, x), String::new());
+        assert_eq!(result.trim(), "3 2 1");
+    }
+
+    #[test]
+    fn text_reduce_right(){
+        let mut queue = Queue::new();
+        queue.enqueue(1);
+        queue.enqueue(2);
+        queue.enqueue(3);
+
+        let sum = queue.reduce_right(|acc, &x| acc + x, 0);
+        assert_eq!(sum, 6);
+
+        let result = queue.reduce_right(|acc, &x| format!("{} {}", acc, x), String::new());
+        assert_eq!(result.trim(), "1 2 3");
+    }
+
+}
+
+
+
+

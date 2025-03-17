@@ -102,9 +102,9 @@ impl<T> Datastructure<T> for Stack<T> where T: PartialEq + ToString + std::fmt::
         new_target
     }
 
-    fn for_each<F>(&self, f: F)
+    fn for_each<F>(&self, mut f: F)
     where
-        F: Fn(&T),
+        F: FnMut(&T),
     {
         for item in &self.data {
             f(item);
@@ -155,4 +155,120 @@ impl<'a, T> Iterator for StackIter<'a, T> {
             None
         }
     }
+}
+
+#[cfg(test)]
+mod test{
+    use super::*;
+
+    #[test]
+    fn test_lazy_map(){
+        let stack = Stack{
+            data: vec![1, 2, 3, 4, 5]
+        };
+
+        let mapped: Vec<_> = stack.lazy_map(|&x| x * 2).collect();
+        assert_eq!(mapped, vec![2, 4, 6, 8, 10]);
+    }
+
+    #[test]
+    fn test_lazy_filter() {
+
+        let stack = Stack {
+            data: vec![1, 2, 3, 4, 5],
+        };
+
+        let filtered: Vec<_> = stack.lazy_filter(|&x| x % 2 == 0).collect();
+        assert_eq!(filtered, vec![&2, &4]);
+    }
+
+    #[test]
+    fn test_push() {
+        let mut stack = Stack { data: Vec::new() };
+
+        stack.push(1);
+        stack.push(2);
+        stack.push(3);
+
+        assert_eq!(stack.data, vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn test_pop() {
+        let mut stack = Stack { data: vec![1, 2, 3] };
+
+        assert_eq!(stack.pop(), Some(3));
+        assert_eq!(stack.data, vec![1, 2]);
+
+        assert_eq!(stack.pop(), Some(2));
+        assert_eq!(stack.data, vec![1]);
+
+        assert_eq!(stack.pop(), Some(1));
+        assert_eq!(stack.data, vec![]);
+
+        assert_eq!(stack.pop(), None);
+    }
+
+    #[test]
+    fn test_peek() {
+        let mut stack = Stack { data: vec![1, 2, 3] };
+        assert_eq!(stack.peek(), Some(&3));
+        assert_eq!(stack.pop(), Some(3));
+        assert_eq!(stack.peek(), Some(&2));
+        
+        stack.push(4);
+        assert_eq!(stack.peek(), Some(&4));
+
+        stack.pop();
+        stack.pop();
+        stack.pop();
+        assert_eq!(stack.peek(), None);     
+    }
+ 
+    #[test]
+    fn test_for_each() {
+        let mut stack = Stack::new();
+        stack.push(1);
+        stack.push(2);
+        stack.push(3);
+        stack.push(4);
+
+        let mut sum =0;
+        stack.for_each(|&x|{sum += x;});
+
+        assert_eq!(sum, 1 + 2 + 3 + 4);
+       
+        }    
+    
+
+    #[test]
+    fn test_reduce() {
+        let stack = Stack { data: vec![1, 2, 3, 4] };
+        let sum = stack.reduce(|acc, &x| acc + x, 0);
+        assert_eq!(sum, 10);
+    }
+
+    #[test]
+    fn test_reduce_right() {
+        let stack = Stack { data: vec![1, 2, 3, 4] };
+        let product = stack.reduce_right(|acc, &x| acc * x, 1);
+        assert_eq!(product, 24);
+    }
+
+    #[test]
+    fn test_map() {
+        let stack = Stack { data: vec![1, 2, 3] };
+        let mapped = stack.map(|&x| x * 2, Stack::new());
+        assert_eq!(mapped.to_string(), "[2, 4, 6]");
+    }
+
+    #[test]
+    fn test_filter() {
+        let stack = Stack { data: vec![1, 2, 3, 4, 5] };
+        let filtered = stack.filter(|&x| x % 2 == 0, Stack::new());
+        assert_eq!(filtered.to_string(), "[2, 4]");
+    }
+    
+
+
 }

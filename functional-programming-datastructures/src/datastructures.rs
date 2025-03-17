@@ -25,7 +25,7 @@ pub trait Datastructure<T> {
 
     fn for_each<F>(&self, f: F)
     where
-        F: Fn(&T);
+        F: FnMut(&T);
 
     fn reduce<U, F>(&self, f: F, initial: U) -> U
     where
