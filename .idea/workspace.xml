@@ -8,7 +8,14 @@
     <cargoProject FILE="$PROJECT_DIR$/simple-datastructures/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7148f6c2-4443-443b-9215-f1be0a5d21c6" name="Changes" comment="" />
+    <list default="true" id="7148f6c2-4443-443b-9215-f1be0a5d21c6" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rpn-calculator/target/.rustc_info.json" beforeDir="false" afterPath="$PROJECT_DIR$/rpn-calculator/target/.rustc_info.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simple-datastructures/src/list.rs" beforeDir="false" afterPath="$PROJECT_DIR$/simple-datastructures/src/list.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simple-datastructures/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/simple-datastructures/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simple-datastructures/target/.rustc_info.json" beforeDir="false" afterPath="$PROJECT_DIR$/simple-datastructures/target/.rustc_info.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simple-datastructures/target/debug/simple-datastructures.d" beforeDir="false" afterPath="$PROJECT_DIR$/simple-datastructures/target/debug/simple-datastructures.d" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -28,55 +35,39 @@
   <component name="MacroExpansionManager">
     <option name="directoryName" value="xJHueEqm" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 3
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="2tyvCjhGys2aafduk1Ua3x0i7Fn" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Cargo.Run simple-datastructures.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "test-datastructure-branch",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/luish/OneDrive/Desktop/Rust Projekt/modern-concepts-rust",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "org.rust.disableDetachedFileInspectionC:/Users/luish/OneDrive/Desktop/Rust Projekt/modern-concepts-rust/simple-datastructures/src/linked_list.rs": "true",
-    "org.rust.disableDetachedFileInspectionC:/Users/luish/OneDrive/Desktop/Rust Projekt/modern-concepts-rust/simple-datastructures/src/list.rs": "true",
-    "org.rust.first.attach.projects": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Cargo.Run simple-datastructures.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/luish/OneDrive/Desktop/Rust Projekt/modern-concepts-rust&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;org.rust.disableDetachedFileInspectionC:/Users/luish/OneDrive/Desktop/Rust Projekt/modern-concepts-rust/simple-datastructures/src/linked_list.rs&quot;: &quot;true&quot;,
+    &quot;org.rust.disableDetachedFileInspectionC:/Users/luish/OneDrive/Desktop/Rust Projekt/modern-concepts-rust/simple-datastructures/src/list.rs&quot;: &quot;true&quot;,
+    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="Run simple-datastructures" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="buildProfileId" value="dev" />
       <option name="command" value="run --package simple-datastructures --bin simple-datastructures" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$/simple-datastructures" />
-      <envs />
-      <option name="emulateTerminal" value="true" />
-      <option name="channel" value="DEFAULT" />
-      <option name="requiredFeatures" value="true" />
-      <option name="allFeatures" value="false" />
-      <option name="withSudo" value="false" />
-      <option name="buildTarget" value="REMOTE" />
-      <option name="backtrace" value="SHORT" />
-      <option name="isRedirectInput" value="false" />
-      <option name="redirectInputPath" value="" />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-      <option name="command" value="run" />
       <envs />
       <option name="emulateTerminal" value="true" />
       <option name="channel" value="DEFAULT" />
@@ -116,7 +107,10 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1741337002767</updated>
-      <workItem from="1741337003896" duration="4002000" />
+      <workItem from="1741337003896" duration="4411000" />
+      <workItem from="1741345398823" duration="230000" />
+      <workItem from="1741345637561" duration="5000" />
+      <workItem from="1741345649646" duration="208000" />
     </task>
     <servers />
   </component>

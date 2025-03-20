@@ -50,47 +50,82 @@ fn main() {
 
     queue.enqueue(4);
     println!("Queue: {}", queue.to_string()); // Output: 2 -> 3 -> 4
-    
-    let mut list = LinkedList::new();
 
-    // Füge einige Elemente hinzu
-    println!("Füge 10 hinzu:");
-    list.push_back(10);
-    println!("{}", list.to_string());  // Erwartete Ausgabe: 10
 
-    println!("Füge 20 hinzu:");
-    list.push_back(20);
-    println!("{}", list.to_string());  // Erwartete Ausgabe: 10 -> 20
+    println!("===================================");
+    println!("Linked List Tests");
+    println!("===================================");
 
-    println!("Füge 30 hinzu:");
-    list.push_back(30);
-    println!("{}", list.to_string());  // Erwartete Ausgabe: 10 -> 20 -> 30
 
-    // Füge ein Element vorne hinzu
-    println!("Füge 5 vorne hinzu:");
-    list.push_front(5);
-    println!("{}", list.to_string());  // Erwartete Ausgabe: 5 -> 10 -> 20 -> 30
+    let mut list: LinkedList<i32> = LinkedList::new();
+    println!("is_empty erster Aufruf: {}", list.is_empty());
+    println!("is_empty zweiter Aufruf: {}", list.is_empty());
 
-    // Poppe das erste Element (vorne)
-    println!("Poppe das erste Element (vorne):");
-    list.pop_front();
-    println!("{}", list.to_string());  // Erwartete Ausgabe: 10 -> 20 -> 30
+    // Test: add_first (2-mal)
+    list.add_first(10);
+    println!("Nach add_first(10): {}", list.to_string());
+    list.add_first(20);
+    println!("Nach add_first(20): {}", list.to_string());
 
-    // Zeige das letzte Element (tail)
-    println!("Das letzte Element ist: {:?}", list.peek_tail());  // Erwartete Ausgabe: Some(30)
+    // Test: add (2-mal)
+    list.add(30);
+    println!("Nach add(30): {}", list.to_string());
+    list.add(40);
+    println!("Nach add(40): {}", list.to_string());
 
-    // Teste die Größe der Liste
-    println!("Die Größe der Liste ist: {}", list.size());  // Erwartete Ausgabe: 3
+    // Test: size (2-mal)
+    println!("size erster Aufruf: {}", list.size());
+    println!("size zweiter Aufruf: {}", list.size());
 
-    // Überprüfe, ob die Liste leer ist
-    println!("Ist die Liste leer? {}", list.is_empty());  // Erwartete Ausgabe: false
+    // Test: content (2-mal; hier für Index 0 und 1)
+    println!("content an Index 0: {:?}", list.content(0));
+    println!("content an Index 1: {:?}", list.content(1));
 
-    // Entferne alle Elemente
-    println!("Poppe alle Elemente:");
-    while let Some(item) = list.pop_front() {
-        println!("Entferntes Element: {}", item);
+    // Test: replace (2-mal)
+    list.replace(1, 15);
+    println!("Nach replace(1, 15): {}", list.to_string());
+    list.replace(1, 25);
+    println!("Nach replace(1, 25): {}", list.to_string());
+
+    // Test: insert (2-mal; Einfügen an Index 2)
+    list.insert(2, 35);
+    println!("Nach insert(2, 35): {}", list.to_string());
+    list.insert(2, 45);
+    println!("Nach insert(2, 45): {}", list.to_string());
+
+    // Test: remove_first (2-mal)
+    if let Some(removed) = list.remove_first() {
+        println!("remove_first erster Aufruf, entfernt: {}", removed);
+        println!("Nach remove_first: {}", list.to_string());
     }
-    println!("Ist die Liste leer? {}", list.is_empty());  
+    if let Some(removed) = list.remove_first() {
+        println!("remove_first zweiter Aufruf, entfernt: {}", removed);
+        println!("Nach remove_first: {}", list.to_string());
+    }
+
+    // Test: remove_at (2-mal; entferne Element an Index 1)
+    list.remove_at(1);
+    println!("Nach remove_at(1) erster Aufruf: {}", list.to_string());
+    list.remove_at(1);
+    println!("Nach remove_at(1) zweiter Aufruf: {}", list.to_string());
+
+    // Test: remove (element) (2-mal)
+    // Damit wir Elemente zum Entfernen haben, fügen wir neue hinzu:
+    list.add(50);
+    list.add(60);
+    println!("Vor remove(element): {}", list.to_string());
+    if let Some(removed) = list.remove(&50) {
+        println!("remove(element) erster Aufruf, entfernt: {}", removed);
+        println!("Nach remove(50): {}", list.to_string());
+    }
+    if let Some(removed) = list.remove(&60) {
+        println!("remove(element) zweiter Aufruf, entfernt: {}", removed);
+        println!("Nach remove(60): {}", list.to_string());
+    }
+
+    // Test: get (2-mal)
+    println!("get(25) erster Aufruf: {}", list.get(&25));
+    println!("get(45) zweiter Aufruf: {}", list.get(&45));
 
     
 }
