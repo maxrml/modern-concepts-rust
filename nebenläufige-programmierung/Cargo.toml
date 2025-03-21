@@ -1,8 +1,0 @@
-[package]
-name = "nebenläufige-programmierung"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-num_cpus = "1.0" 
-crossbeam = "0.8"
