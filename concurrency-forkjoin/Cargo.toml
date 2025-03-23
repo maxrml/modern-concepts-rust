@@ -1,0 +1,9 @@
+[package]
+name = "concurrency_forkjoin"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rayon = "1.10.0"
+threadpool = "1.8.1"
+workerpool = "1.2.1"
