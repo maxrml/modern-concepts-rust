@@ -1,1 +1,1 @@
-/Users/I751109/Documents/RustProjects/modern-concepts-rust/concurrency-forkjoin/target/debug/concurrency_forkjoin: /Users/I751109/Documents/RustProjects/modern-concepts-rust/concurrency-forkjoin/src/main.rs
+/Users/I752559/Documents/Konzepte\ der\ Programmierung/Parallelisierung/modern-concepts-rust/concurrency-forkjoin/target/debug/concurrency_forkjoin: /Users/I752559/Documents/Konzepte\ der\ Programmierung/Parallelisierung/modern-concepts-rust/concurrency-forkjoin/src/main.rs

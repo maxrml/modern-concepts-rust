@@ -1,5 +1,6 @@
 use std::sync::{Arc, Mutex};
 use threadpool::ThreadPool;
+use std::time::Instant;
 
 /// Parallele Map-Funktion
 /// Wendet `func` auf jedes Element von `data` an und gibt die Ergebnisse als `Vec<U>` zurück
@@ -77,3 +78,44 @@ fn main() {
     let sum = parallel_reduce(&data, |a, b| a + b, 0);
     println!("Sum: {}", sum);
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parallel_map() {
+        let mut list = vec![1, 2, 3, 4, 5];
+
+        let mapped_data = parallel_map(&list, |x| x * 2);
+        assert_eq!(mapped_data, vec![2, 4, 6, 8, 10]);
+    }
+
+    #[test]
+    fn test_parallel_reduce() {
+        let mut list = vec![1, 2, 3, 4, 5];
+
+        let data = parallel_reduce(&list, |a, b| a + b, 0);
+        assert_eq!(data, 15);
+    }
+
+    #[test]
+    fn test_parallel_map_with_timing() {
+        let list: Vec<u32> = (1..=1_000_000).collect(); // Deutlich größerer Vektor
+        
+        let start = Instant::now();
+        let mapped_data = parallel_map(&list, |x| x * 2);
+        let duration = start.elapsed();
+        
+        assert_eq!(mapped_data.len(), list.len());
+        assert_eq!(mapped_data[0], 2);
+        assert_eq!(mapped_data[list.len() - 1], list[list.len() - 1] * 2);
+
+        println!("Parallel map execution time: {:?}", duration);
+    }
+
+
+
+
+} 
