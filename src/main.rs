@@ -70,10 +70,10 @@ fn main() {
     println!("Derivative f'(x): {}", selected_f.derivative().simplify().to_string_normal());
     
     //plot the graphs f(x) and its derivative on the svg canvas
-    println!("Would you like to plot f(x) and its derivative on the SVG canvas? (yes/no)");
-    let mut plot_choice = String::new();
-    io::stdin().read_line(&mut plot_choice).expect("Error reading input");
-    plot_choice = plot_choice.trim().to_lowercase();
+    // println!("Would you like to plot f(x) and its derivative on the SVG canvas? (yes/no)");
+    // let mut plot_choice = String::new();
+    // io::stdin().read_line(&mut plot_choice).expect("Error reading input");
+    // plot_choice = plot_choice.trim().to_lowercase();
 
 
 
@@ -82,37 +82,37 @@ fn main() {
     let mut canvas = SvgCanvas::new(300, 300);
 
     //plot the points of f(x) and its derivative
-    if plot_choice == "yes"{
-        let function_points = SvgCanvas::generate_function_points(selected_f, "blue");
-        let derivative_points = SvgCanvas::generate_function_points(&selected_f.derivative(), "red");
+    // if plot_choice == "yes"{
+    //     let function_points = SvgCanvas::generate_function_points(selected_f, "blue");
+    //     let derivative_points = SvgCanvas::generate_function_points(&selected_f.derivative(), "red");
 
-        for point in function_points {
-            canvas.add_shape(point);
-        }
+    //     for point in function_points {
+    //         canvas.add_shape(point);
+    //     }
 
-        for point in derivative_points {
-            canvas.add_shape(point);
-        }
+    //     for point in derivative_points {
+    //         canvas.add_shape(point);
+    //     }
 
-        let x_axis = Shape::Line {
-            x1: 0,
-            y1: 150,
-            x2: 300,
-            y2: 150,
-            stroke: "black".to_string(),
-        };
-        canvas.add_shape(x_axis);
+    //     let x_axis = Shape::Line {
+    //         x1: 0,
+    //         y1: 150,
+    //         x2: 300,
+    //         y2: 150,
+    //         stroke: "black".to_string(),
+    //     };
+    //     canvas.add_shape(x_axis);
     
         
-        let y_axis = Shape::Line {
-            x1: 150,
-            y1: 0,
-            x2: 150,
-            y2: 300,
-            stroke: "black".to_string(),
-        };
-        canvas.add_shape(y_axis);
-    }
+    //     let y_axis = Shape::Line {
+    //         x1: 150,
+    //         y1: 0,
+    //         x2: 150,
+    //         y2: 300,
+    //         stroke: "black".to_string(),
+    //     };
+    //     canvas.add_shape(y_axis);
+    // }
 
     //loop through shape, colour, coordinates and size, to let user "draw" multiptle shapes
     loop {
