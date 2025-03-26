@@ -1,4 +1,6 @@
 #![feature(core_intrinsics)]
+#![allow(internal_features)]
+#![allow(unused_unsafe)]
 
 use memmap2::Mmap;
 use std::fs::File;
@@ -11,10 +13,10 @@ use std::intrinsics::likely;
 
 const MAX_LEN: usize = 255;
 
-// Wir speichern das Ergebnis in einem statisch-allokierten Puffer, um Allocationen zu vermeiden.
+// Wir speichern das Ergebnis in einem statisch-allokierten Puffer, um dynamische Allocationen zu vermeiden.
 struct FoundResult {
-    candidate: [u8; MAX_LEN + 1], // Kandidaten-Bytes im Puffer
-    len: usize,                  // Tatsächliche Länge der Zeichenkette
+    candidate: [u8; MAX_LEN + 1], // Enthält den Kandidaten (ggf. mit Affix)
+    len: usize,                  // Tatsächliche Länge der Zeichenkette im Buffer
     duration: std::time::Duration,
 }
 
@@ -25,58 +27,68 @@ const TARGET_DIGESTS: [[u8; 16]; 3] = [
     [0xd3, 0x1d, 0xaf, 0x65, 0x79, 0x54, 0x8a, 0x2a, 0x1b, 0xf5, 0xa9, 0xbd, 0x57, 0xb5, 0xbb, 0x89],
 ];
 
-#[inline(always)]
-unsafe fn check_target(
-    digest: [u8; 16],
-    candidate: *const u8,
-    candidate_len: usize,
+/// Speichert eine Variante (Suffix oder Präfix) – nur im Erfolgsfall wird kopiert.
+unsafe fn store_variant(
+    candidate: &[u8],
+    aff: u8,
+    is_suffix: bool,
     start: Instant,
     found_count: &AtomicUsize,
     slot: &AtomicPtr<FoundResult>,
 ) -> bool {
-    // Falls der Slot noch leer ist, erstellen wir ein Ergebnis und kopieren den Kandidaten hinein.
+    // Bestimme die Gesamtlänge der Variante: Original + 1 Byte Affix
+    let new_len = candidate.len() + 1;
     if slot.load(Ordering::Relaxed).is_null() {
         let mut res_box = Box::new(FoundResult {
             candidate: [0u8; MAX_LEN + 1],
-            len: candidate_len,
+            len: new_len,
             duration: start.elapsed(),
         });
-        ptr::copy_nonoverlapping(candidate, res_box.candidate.as_mut_ptr(), candidate_len);
+        if is_suffix {
+            // Kopiere den Original-Kandidaten an den Anfang
+            ptr::copy_nonoverlapping(candidate.as_ptr(), res_box.candidate.as_mut_ptr(), candidate.len());
+            // Anhängen des Affix
+            res_box.candidate[candidate.len()] = aff;
+        } else {
+            // Präfix: Schreibe das Affix an Position 0
+            res_box.candidate[0] = aff;
+            // Kopiere den Original-Kandidaten ab Index 1
+            ptr::copy_nonoverlapping(candidate.as_ptr(), res_box.candidate.as_mut_ptr().add(1), candidate.len());
+        }
         let res_ptr = Box::into_raw(res_box);
         if slot.compare_exchange(ptr::null_mut(), res_ptr, Ordering::SeqCst, Ordering::SeqCst).is_ok() {
             found_count.fetch_add(1, Ordering::Relaxed);
             return true;
         } else {
-            // Falls jemand anderes den Slot belegt hat, geben wir den Speicher frei.
             let _ = Box::from_raw(res_ptr);
         }
     }
     false
 }
 
+/// Vergleicht den berechneten Digest mit den drei Zielwerten und ruft bei Übereinstimmung store_variant auf.
 #[inline(always)]
-unsafe fn check_digest_inlined(
+unsafe fn check_digest_variant(
     digest: [u8; 16],
-    candidate: *const u8,
-    candidate_len: usize,
+    candidate: &[u8],
+    is_suffix: bool,
     start: Instant,
     found_count: &AtomicUsize,
     results: &[AtomicPtr<FoundResult>],
 ) -> bool {
     let mut hit = false;
-    // Manuelles Unrollen für die 3 Zielwerte (Branch-Hinweise mit likely)
     if likely(digest == TARGET_DIGESTS[0]) {
-        if check_target(digest, candidate, candidate_len, start, found_count, &results[0]) {
+        if store_variant(candidate, candidate[candidate.len() - 1], is_suffix, start, found_count, &results[0]) {
             hit = true;
         }
     }
     if likely(digest == TARGET_DIGESTS[1]) {
-        if check_target(digest, candidate, candidate_len, start, found_count, &results[1]) {
+        if store_variant(candidate, candidate[candidate.len() - 1], is_suffix, start, found_count, &results[1]) {
             hit = true;
         }
     }
     if likely(digest == TARGET_DIGESTS[2]) {
-        if check_target(digest, candidate, candidate_len, start, found_count, &results[2]) {
+        if store_variant(candidate, candidate[candidate.len() - 1], is_suffix, start, found_count, &results[2]) {
             hit = true;
         }
     }
@@ -96,7 +108,7 @@ fn main() -> std::io::Result<()> {
     let mmap = unsafe { Mmap::map(&file)? };
     let data = mmap.as_ref();
 
-    // Splitte die Datei nach Zeilen (hier wird ein Vec erstellt, was man noch weiter optimieren könnte)
+    // Splitte die Datei nach Zeilen (hier wird ein Vec erstellt)
     let lines: Vec<&[u8]> = data.split(|&b| b == b'\n').collect();
 
     // Die 13 Affixe: '!', '+', '#' und '0'..'9'
@@ -112,47 +124,66 @@ fn main() -> std::io::Result<()> {
             if len == 0 || len > MAX_LEN {
                 continue;
             }
+            // Der Kandidat als Slice aus dem Memory-map (keine Kopie)
+            let candidate_slice = line;
             unsafe {
-                let candidate_ptr = line.as_ptr();
-
                 // Original-Kandidat verarbeiten
                 let mut hasher = Md5::new();
-                hasher.update(std::slice::from_raw_parts(candidate_ptr, len));
+                hasher.update(candidate_slice);
                 let orig_digest = hasher.finalize_reset();
                 let orig_digest_arr: [u8; 16] = orig_digest.into();
-                if check_digest_inlined(orig_digest_arr, candidate_ptr, len, start, &found_count, &results) {
+                // Prüfe den Original-Kandidaten (ohne Affix)
+                if orig_digest_arr == TARGET_DIGESTS[0]
+                    || orig_digest_arr == TARGET_DIGESTS[1]
+                    || orig_digest_arr == TARGET_DIGESTS[2]
+                {
+                    // Falls Match, kopieren wir den Original-Kandidaten in einen FoundResult
+                    let _ = unsafe { store_variant(candidate_slice, 0, true, start, &found_count, &results[0]) }; // Hier als Beispiel Target 0
                     continue;
                 }
 
-                // Lege einen stack-allokierten Puffer an (ohne Allocation) für Variantenerstellung
-                let mut buf: [u8; MAX_LEN + 1] = [0u8; MAX_LEN + 1];
-
-                // Suffix-Varianten: Kopiere den Kandidaten in den Puffer
-                ptr::copy_nonoverlapping(candidate_ptr, buf.as_mut_ptr(), len);
+                // Suffix-Varianten: Berechne den Hash direkt ohne Kopie
                 for &aff in affixes {
                     if found_count.load(Ordering::Relaxed) >= num_targets {
                         break;
                     }
-                    buf[len] = aff;
                     let mut h = Md5::new();
-                    h.update(&buf[..len + 1]);
+                    h.update(candidate_slice);
+                    h.update(&[aff]);
                     let d = h.finalize_reset();
                     let d_arr: [u8; 16] = d.into();
-                    check_digest_inlined(d_arr, buf.as_ptr(), len + 1, start, &found_count, &results);
+                    // Wenn ein Ziel-Digest passt, wird in store_variant dann der Kandidat mit Affix kopiert.
+                    if d_arr == TARGET_DIGESTS[0]
+                        || d_arr == TARGET_DIGESTS[1]
+                        || d_arr == TARGET_DIGESTS[2]
+                    {
+                        // Wir bauen die Variante (Original + Suffix) erst jetzt auf.
+                        let mut variant = Vec::with_capacity(candidate_slice.len() + 1);
+                        variant.extend_from_slice(candidate_slice);
+                        variant.push(aff);
+                        let _ = check_digest_variant(d_arr, &variant, true, start, &found_count, &results);
+                    }
                 }
 
-                // Präfix-Varianten: Kopiere den Kandidaten ab Index 1
-                ptr::copy_nonoverlapping(candidate_ptr, buf.as_mut_ptr().add(1), len);
+                // Präfix-Varianten: Berechne den Hash direkt ohne Kopie
                 for &aff in affixes {
                     if found_count.load(Ordering::Relaxed) >= num_targets {
                         break;
                     }
-                    buf[0] = aff;
                     let mut h = Md5::new();
-                    h.update(&buf[..len + 1]);
+                    h.update(&[aff]);
+                    h.update(candidate_slice);
                     let d = h.finalize_reset();
                     let d_arr: [u8; 16] = d.into();
-                    check_digest_inlined(d_arr, buf.as_ptr(), len + 1, start, &found_count, &results);
+                    if d_arr == TARGET_DIGESTS[0]
+                        || d_arr == TARGET_DIGESTS[1]
+                        || d_arr == TARGET_DIGESTS[2]
+                    {
+                        let mut variant = Vec::with_capacity(candidate_slice.len() + 1);
+                        variant.push(aff);
+                        variant.extend_from_slice(candidate_slice);
+                        let _ = check_digest_variant(d_arr, &variant, false, start, &found_count, &results);
+                    }
                 }
             }
         }
@@ -171,7 +202,7 @@ fn main() -> std::io::Result<()> {
                 let res = Box::from_raw(ptr);
                 let candidate_str = std::str::from_utf8(&res.candidate[..res.len]).unwrap_or("Invalid UTF-8");
                 println!(
-                    "✅ Target Hash: {} => Passwort: {} (Gefunden in {:?})",
+                    "Target Hash: {} => Password: {} (Found in {:?})",
                     hex::encode(target),
                     candidate_str,
                     res.duration
@@ -180,8 +211,8 @@ fn main() -> std::io::Result<()> {
         }
     }
     if !found_any {
-        println!("❌ Kein passendes Passwort gefunden.");
+        println!("No passwords were found");
     }
-    println!("Gesamte Suchzeit: {:?}", elapsed_total);
+    println!("Total Time: {:?}", elapsed_total);
     Ok(())
 }
