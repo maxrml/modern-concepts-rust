@@ -82,7 +82,6 @@ impl SvgCanvas {
     //         let screen_y1 = (150.0 - (prev_y * 10.0)).round() as i32;
     //         let screen_x2 = (x * 10.0).round() as i32 + 150;
     //         let screen_y2 = (150.0 - (y * 10.0)).round() as i32;
-    
 
     //         shapes.push(Shape::Line {
     //         x1: screen_x1,
