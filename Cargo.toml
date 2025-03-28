@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-my_macro_lib = { path = "../my_macro_lib" }
+my_macro_lib = { path = "./my_macro_lib" }

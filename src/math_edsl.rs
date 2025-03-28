@@ -1,8 +1,3 @@
-use std::fmt;
-use std::str::FromStr;
-
-
-
 #[derive(Clone)]
 //definiion of an enum to represent mathematical expressions
 pub enum Expr {

@@ -55,48 +55,42 @@ macro_rules! expr_var {
 }
 
 
-// In macros.rs
 
-// Expression-Makro für die Mathematischen Operationen
 #[macro_export]
 macro_rules! expr {
-    // Addition
-    ($left:expr + $right:expr) => {
-        $crate::math_edsl::Expr::Add(Box::new($crate::expr!($left)), Box::new($crate::expr!($right)))
+// Base case for numbers
+($num:literal) => {
+    Expr::Num($num)
     };
     
-    // Subtraktion
-    ($left:expr - $right:expr) => {
-        $crate::math_edsl::Expr::Sub(Box::new($crate::expr!($left)), Box::new($crate::expr!($right)))
-    };
-
-    // Multiplikation
-    ($left:expr * $right:expr) => {
-        $crate::math_edsl::Expr::Mul(Box::new($crate::expr!($left)), Box::new($crate::expr!($right)))
-    };
-
-    // Division
-    ($left:expr / $right:expr) => {
-        $crate::math_edsl::Expr::Div(Box::new($crate::expr!($left)), Box::new($crate::expr!($right)))
-    };
-
-    // Potenzen (exponentiation)
-    ($base:expr ^ $exp:expr) => {
-        $crate::math_edsl::Expr::Pow(Box::new($crate::expr!($base)), $exp)
-    };
-
-    // Quadratwurzel
-    (sqrt($inner:expr)) => {
-        $crate::math_edsl::Expr::Sqrt(Box::new($crate::expr!($inner)))
-    };
-
-    // Variable x
+    // Variable handling
     (x) => {
-        $crate::math_edsl::Expr::Var
+    Expr::Var
     };
-
-    // Zahl
-    ($num:expr) => {
-        $crate::math_edsl::Expr::Num($num)
+    
+    // Addition
+    (($left:tt) + ($right:tt)) => {
+    Expr::Add(Box::new(expr!($left)), Box::new(expr!($right)))
     };
-}
+    
+    // Subtraction
+    (($left:tt) - ($right:tt)) => {
+    Expr::Sub(Box::new(expr!($left)), Box::new(expr!($right)))
+    };
+    
+    // Multiplication
+    (($left:tt) * ($right:tt)) => {
+    Expr::Mul(Box::new(expr!($left)), Box::new(expr!($right)))
+    };
+    
+    // Division
+    (($left:tt) / ($right:tt)) => {
+    Expr::Div(Box::new(expr!($left)), Box::new(expr!($right)))
+    };
+    
+    // Exponentiation
+    (($base:tt) ^ ($exp:tt)) => {
+    Expr::Pow(Box::new(expr!($base)), Box::new(expr!($exp)))
+    };
+    }
+    
