@@ -2,6 +2,8 @@
 use std::fs::File;
 use std::io::Write;
 
+use crate::math_edsl::Expr;
+
 //define an enum to represent the shapes in SVG
 pub enum Shape {
     Circle {
@@ -42,6 +44,36 @@ pub struct SvgCanvas {
 
 //creates a new SVG canvas with a given height and width & an empty vector (array) of shapes
 impl SvgCanvas {
+    pub fn add_function_graph(&mut self, expr: &Expr, color: &str) {
+        let x_min = -10.0;
+        let x_max = 10.0;
+        let step = 0.05;
+
+        let mut prev_x = x_min;
+        let mut prev_y = expr.eval(prev_x);
+        let mut x = prev_x + step;
+
+        while x <= x_max {
+            let y = expr.eval(x);
+            let screen_x1 = (prev_x * 10.0).round() as i32 + 250;
+            let screen_y1 = (250.0 - (prev_y * 10.0)).round() as i32;
+            let screen_x2 = (x * 10.0).round() as i32 + 250;
+            let screen_y2 = (250.0 - (y * 10.0)).round() as i32;
+
+            self.add_shape(Shape::Line {
+                x1: screen_x1,
+                y1: screen_y1,
+                x2: screen_x2,
+                y2: screen_y2,
+                stroke: color.to_string(),
+            });
+
+            prev_x = x;
+            prev_y = y;
+            x += step;
+        }
+    }
+
     pub fn new(width: i32, height: i32) -> Self {
         Self {
             width,
@@ -54,49 +86,6 @@ impl SvgCanvas {
     pub fn add_shape(&mut self, shape: Shape) {
         self.shapes.push(shape);
     }
-
-    //generate points for graphs of f(x) and its derivative
-    // pub fn generate_function_points(expr: &Expr, color: &str) -> Vec<Shape> {
-    //     let mut shapes = Vec::new();
-
-    //     let x_min = -10.0;
-    //     let x_max = 10.0;
-    //     let step = 0.05;
-
-    //     let mut prev_x = x_min;
-    //     let mut prev_y = expr.eval(prev_x);
-
-    //     let mut x = prev_x + step;
-
-    //     while x <= x_max {
-    //         let y = expr.eval(x);
-
-    //         if !y.is_finite() || !prev_y.is_finite() {
-    //             prev_x = x;
-    //             prev_y = y;
-    //             x += step;
-    //             continue;
-    //         }
-
-    //         let screen_x1 = (prev_x * 10.0).round() as i32 + 150;
-    //         let screen_y1 = (150.0 - (prev_y * 10.0)).round() as i32;
-    //         let screen_x2 = (x * 10.0).round() as i32 + 150;
-    //         let screen_y2 = (150.0 - (y * 10.0)).round() as i32;
-
-    //         shapes.push(Shape::Line {
-    //         x1: screen_x1,
-    //         y1: screen_y1,
-    //         x2: screen_x2,
-    //         y2: screen_y2,
-    //         stroke: color.to_string(),
-    //     });
-
-    //     prev_x = x;
-    //     prev_y = y;
-    //     x += step;
-    //     }
-    //     shapes
-    // }
 
     //generates an SVG string representing the canvas and its shapes
     pub fn to_svg(&self) -> String {

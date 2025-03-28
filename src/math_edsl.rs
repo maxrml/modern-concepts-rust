@@ -1,4 +1,7 @@
 use std::fmt;
+use std::str::FromStr;
+
+
 
 #[derive(Clone)]
 //definiion of an enum to represent mathematical expressions
@@ -19,60 +22,11 @@ impl Expr {
         match self {
             Expr::Num(n) => *n,
             Expr::Var => x,
-            Expr::Add(a, b) => {
-                let a_eval = a.eval(x);
-                let b_eval = b.eval(x);
-                if a_eval == 0.0 {
-                    return b_eval
-                }
-                if b_eval == 0.0 {
-                    return a_eval
-                }
-                a_eval + b_eval
-            },
-            Expr::Sub(a, b) => {
-                let a_eval = a.eval(x);
-                let b_eval = b.eval(x);
-                if b_eval == 0.0 {
-                    return a_eval
-                }
-                a_eval - b_eval
-            },
-            Expr::Mul(a, b) => {
-                let a_eval = a.eval(x);
-                let b_eval = b.eval(x);
-                if a_eval == 0.0 || b_eval == 0.0 {
-                    return 0.0;
-                }
-                if a_eval == 1.0 {
-                    return b_eval
-                }
-                if b_eval == 1.0 {
-                    return a_eval
-                }
-                a_eval * b_eval
-            },
-            Expr::Div(a, b) => {
-                let a_eval = a.eval(x);
-                let b_eval = b.eval(x);
-                if a_eval == 0.0 {
-                    return 0.0
-                }
-                if b_eval ==  1.0 {
-                    return a_eval;
-                }
-                a_eval / b_eval
-            },
-            Expr::Pow(a, n) => {
-                let a_eval = a.eval(x);
-                if *n == 0.0 {
-                    return 1.0
-                }
-                if *n == 1.0 {
-                    return a_eval
-                }
-                a_eval.powf(*n)
-            },
+            Expr::Add(a, b) => a.eval(x) + b.eval(x),
+            Expr::Sub(a, b) => a.eval(x) - b.eval(x),
+            Expr::Mul(a, b) => a.eval(x) * b.eval(x),
+            Expr::Div(a, b) => a.eval(x) / b.eval(x),
+            Expr::Pow(a, n) => a.eval(x).powf(*n),
             Expr::Sqrt(a) => a.eval(x).sqrt(),
         }
     }
@@ -135,9 +89,9 @@ impl Expr {
                 let a_simp = a.simplify();
                 let b_simp = b.simplify();
                 match (&a_simp, &b_simp) {
-                    (Expr::Num(0.0), _) | (_, Expr::Num(0.0)) => Expr::Num(0.0), // 0 * x = 0
-                    (Expr::Num(1.0), _) => b_simp, // 1 * x = x
-                    (_, Expr::Num(1.0)) => a_simp, // x * 1 = x
+                    (Expr::Num(0.0), _) | (_, Expr::Num(0.0)) => Expr::Num(0.0),
+                    (Expr::Num(1.0), _) => b_simp,
+                    (_, Expr::Num(1.0)) => a_simp,
                     _ => Expr::Mul(Box::new(a_simp), Box::new(b_simp)),
                 }
             }
@@ -147,7 +101,7 @@ impl Expr {
                 let a_simp = a.simplify();
                 let b_simp = b.simplify();
                 if let Expr::Num(0.0) = b_simp {
-                    return a_simp; // x - 0 = x
+                    return a_simp;
                 }
                 Expr::Sub(Box::new(a_simp), Box::new(b_simp))
             }
@@ -156,10 +110,10 @@ impl Expr {
                 let a_simp = a.simplify();
                 let b_simp = b.simplify();
                 if let Expr::Num(1.0) = b_simp {
-                    return a_simp; // x / 1 = x
+                    return a_simp; 
                 }
                 if let Expr::Num(0.0) = a_simp {
-                    return Expr::Num(0.0); // 0 / x = 0
+                    return Expr::Num(0.0); 
                 }
                 Expr::Div(Box::new(a_simp), Box::new(b_simp))
             }
@@ -167,10 +121,10 @@ impl Expr {
             Expr::Pow(a, n) => {
                 let a_simp = a.simplify();
                 if *n == 0.0 {
-                    return Expr::Num(1.0); // x^0 = 1
+                    return Expr::Num(1.0);
                 }
                 if *n == 1.0 {
-                    return a_simp; // x^1 = x
+                    return a_simp;
                 }
                 Expr::Pow(Box::new(a_simp), *n)
             }
@@ -211,8 +165,111 @@ impl Expr {
 }
 
 //allows formatted printing of expressions
-impl fmt::Display for Expr {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.to_string_normal())
+// impl fmt::Display for Expr {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         write!(f, "{}", self.to_string_normal())
+//     }
+// }
+
+pub fn parse_expression(input: &str) -> Result<Expr, String> {
+    let mut chars = input.chars().peekable();
+    parse_sum(&mut chars)
+}
+
+// Hilfsfunktionen zum Parsen von Summe, Term und Faktoren
+fn parse_sum<I>(chars: &mut I) -> Result<Expr, String>
+where
+    I: Iterator<Item = char>,
+{
+    let mut chars = chars.peekable();
+    let mut term = parse_term(&mut chars)?;
+    while let Some(&ch) = chars.peek() {
+        match ch {
+            '+' => {
+                chars.next(); // Consume the '+'
+                let right = parse_term(&mut chars)?;
+                term = Expr::Add(Box::new(term), Box::new(right));
+            }
+            '-' => {
+                chars.next(); // Consume the '-'
+                let right = parse_term(&mut chars)?;
+                term = Expr::Sub(Box::new(term), Box::new(right));
+            }
+            _ => break,
+        }
+    }
+    Ok(term)
+}
+
+fn parse_term<I>(chars: &mut I) -> Result<Expr, String>
+where
+    I: Iterator<Item = char>,
+{
+    let mut chars = chars.peekable();
+    let mut factor = parse_factor(&mut chars)?;
+    while let Some(&ch) = chars.peek() {
+        match ch {
+            '*' => {
+                chars.next(); // Consume the '*'
+                let right = parse_factor(&mut chars)?;
+                factor = Expr::Mul(Box::new(factor), Box::new(right));
+            }
+            '/' => {
+                chars.next(); // Consume the '/'
+                let right = parse_factor(&mut chars)?;
+                factor = Expr::Div(Box::new(factor), Box::new(right));
+            }
+            _ => break,
+        }
+    }
+    Ok(factor)
+}
+
+fn parse_factor<I>(chars: &mut I) -> Result<Expr, String>
+where
+    I: Iterator<Item = char>,
+{
+    let mut chars = chars.peekable();
+    if let Some(ch) = chars.next() {
+        match ch {
+            'x' => Ok(Expr::Var),
+            '0'..='9' => {
+                let mut num_str = ch.to_string();
+                while let Some(&next) = chars.peek() {
+                    if next.is_numeric() || next == '.' {
+                        num_str.push(chars.next().unwrap());
+                    } else {
+                        break;
+                    }
+                }
+                num_str.parse::<f64>().map(Expr::Num).map_err(|_| "Ungültige Zahl".to_string())
+            }
+            '(' => {
+                let expr = parse_sum(&mut chars)?;
+                if chars.next() == Some(')') {
+                    Ok(expr)
+                } else {
+                    Err("Erwartete schließende Klammer".to_string())
+                }
+            }
+            's' => {
+                if let Some('q') = chars.next() {
+                    if let Some('r') = chars.next() {
+                        if let Some('t') = chars.next() {
+                            if chars.next() == Some('(') {
+                                let inner = parse_sum(&mut chars)?;
+                                if chars.next() == Some(')') {
+                                    return Ok(Expr::Sqrt(Box::new(inner)));
+                                }
+                            }
+                        }
+                    }
+                }
+                Err("Ungültiger Ausdruck für Sqrt".to_string())
+            }
+            _ => Err("Ungültiges Zeichen".to_string()),
+        }
+    } else {
+        Err("Erwartetes Zeichen".to_string())
     }
 }
