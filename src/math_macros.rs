@@ -1,7 +1,7 @@
 #[macro_export]
-macro_rules! expr {
+macro_rules! math_expr {
     (($($inner:tt)*)) => {
-        expr!($($inner)*)
+        math_expr!($($inner)*)
     };
 
     // Base case for numbers
@@ -10,32 +10,32 @@ macro_rules! expr {
     };
 
     // Variable handling
-    ($x:ident) => {
+    (x) => {
         crate::math_edsl::Expr::Var
     };
 
     // Addition
     ($left:tt + $right:tt) => {
-        crate::math_edsl::Expr::Add(Box::new(expr!($left)), Box::new(expr!($right)))
+        crate::math_edsl::Expr::Add(Box::new(math_expr!($left)), Box::new(math_expr!($right)))
     };
 
     // Subtraction
     ($left:tt - $right:tt) => {
-        crate::math_edsl::Expr::Sub(Box::new(expr!($left)), Box::new(expr!($right)))
+        crate::math_edsl::Expr::Sub(Box::new(math_expr!($left)), Box::new(math_expr!($right)))
     };
 
     // Multiplication
     ($left:tt * $right:tt) => {
-        crate::math_edsl::Expr::Mul(Box::new(expr!($left)), Box::new(expr!($right)))
+        crate::math_edsl::Expr::Mul(Box::new(math_expr!($left)), Box::new(math_expr!($right)))
     };
 
     // Division
     ($left:tt / $right:tt) => {
-        crate::math_edsl::Expr::Div(Box::new(expr!($left)), Box::new(expr!($right)))
+        crate::math_edsl::Expr::Div(Box::new(math_expr!($left)), Box::new(math_expr!($right)))
     };
 
     // Exponentiation
     ($base:tt ^ $exp:literal) => {
-        crate::math_edsl::Expr::Pow(Box::new(expr!($base)), $exp)
+        crate::math_edsl::Expr::Pow(Box::new(math_expr!($base)), $exp)
     };
 }

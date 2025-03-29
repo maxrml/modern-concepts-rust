@@ -1,8 +1,5 @@
-// use crate::math_edsl::Expr;
 use std::fs::File;
 use std::io::Write;
-
-use crate::math_edsl::Expr;
 
 //define an enum to represent the shapes in SVG
 pub enum Shape {
@@ -44,41 +41,12 @@ pub struct SvgCanvas {
 
 //creates a new SVG canvas with a given height and width & an empty vector (array) of shapes
 impl SvgCanvas {
-    pub fn add_function_graph(&mut self, expr: &Expr, color: &str) {
-        let x_min = -10.0;
-        let x_max = 10.0;
-        let step = 0.05;
 
-        let mut prev_x = x_min;
-        let mut prev_y = expr.eval(prev_x);
-        let mut x = prev_x + step;
-
-        while x <= x_max {
-            let y = expr.eval(x);
-            let screen_x1 = (prev_x * 10.0).round() as i32 + 250;
-            let screen_y1 = (250.0 - (prev_y * 10.0)).round() as i32;
-            let screen_x2 = (x * 10.0).round() as i32 + 250;
-            let screen_y2 = (250.0 - (y * 10.0)).round() as i32;
-
-            self.add_shape(Shape::Line {
-                x1: screen_x1,
-                y1: screen_y1,
-                x2: screen_x2,
-                y2: screen_y2,
-                stroke: color.to_string(),
-            });
-
-            prev_x = x;
-            prev_y = y;
-            x += step;
-        }
-    }
-
-    pub fn new(width: i32, height: i32) -> Self {
+    pub fn new(width: i32, height: i32, shapes: Vec<Shape>) -> Self {
         Self {
             width,
             height,
-            shapes: vec![],
+            shapes,
         }
     }
 
@@ -144,10 +112,10 @@ impl SvgCanvas {
         svg
     }
 
-    //saves the generated SVG string to a file
+    // saves the generated SVG string to a file
     pub fn save(&self, filename: &str) {
         let mut file = File::create(filename).expect("Could not create file");
-        file.write_all(self.to_svg().as_bytes())
-            .expect("Could not create file");
+        file.write_all(self.to_svg().as_bytes()).expect("Could not write to file");
+        println!("{} successfully saved", filename)
     }
 }

@@ -1,12 +1,12 @@
 // #![feature(trace_macros)]
 // trace_macros!(true);
 
-pub mod macros;
+pub mod math_macros;
 pub mod math_edsl;
 pub mod svg_edsl;
+pub mod svg_macros;
 
-use my_macro_lib::calculate_expr;
-use svg_edsl::{Shape, SvgCanvas};
+use svg_edsl::SvgCanvas;
 use math_edsl::Expr;
 
 
@@ -17,11 +17,10 @@ fn test(current: Expr, expected: Expr) {
 }
 
 fn main() {
-    // Definiere die mathematische Funktion und den x-Wert im Code
-
-    test(expr!(4.0), Expr::Num(4.0));
-    test(expr!(4.0 + 5.0), Expr::Add(Box::new(Expr::Num(4.0)), Box::new(Expr::Num(5.0))));
-    test(expr!(4.0 * ((5.0^2.0) - 3.0)), Expr::Mul(
+    // --------------------math edsl------------------------
+    test(math_expr!(4.0), Expr::Num(4.0));
+    test(math_expr!(4.0 + 5.0), Expr::Add(Box::new(Expr::Num(4.0)), Box::new(Expr::Num(5.0))));
+    test(math_expr!(4.0 * ((5.0^2.0) - 3.0)), Expr::Mul(
         Box::new(Expr::Num(4.0)),
         Box::new(Expr::Sub(
             Box::new(Expr::Pow(Box::new(Expr::Num(5.0)), 2.0)),
@@ -29,7 +28,7 @@ fn main() {
         ))
     ));
     
-    test(expr!((4.0 / 2.0) + x), Expr::Add(
+    test(math_expr!((4.0 / 2.0) + x), Expr::Add(
         Box::new(Expr::Div(
             Box::new(Expr::Num(4.0)),
             Box::new(Expr::Num(2.0))
@@ -37,14 +36,14 @@ fn main() {
         Box::new(Expr::Var)
     ));
 
-    let input = expr!(3.0 * (x + 5.0));
+    let input = math_expr!(3.0 * (x + 5.0));
 
-    expr!((((((x))))));
-    expr!(asdjfa);
+    math_expr!((((((x))))));
+    math_expr!(x);
 
     // Add(3.0, (1.0) + (1.0))
 
-    println!("Evaluated Expression: {:?}", input);
+    println!("Evaluated Expression: {:?}", input.to_string_normal());
 
     let x_value = 2.0;
 
@@ -58,15 +57,20 @@ fn main() {
     let derivative = input.derivative().simplify().to_string_normal();
     println!("Ableitung f'(x): {}", derivative);
 
-    // Definiere eine SVG-Zeichnung im Code (Beispiel)
-    let mut svg = SvgCanvas::new(500, 500);
-    svg.add_function_graph(&input, "blue");
-    svg.add_shape(Shape::Circle {
-        cx: 250,
-        cy: 250,
-        r: 50,
-        fill: "red".to_string(),
-    });
+    // --------------------svg edsl------------------------
+    svg_elem!(circle(1, 2, 5, "red"));
+    svg_elem! (circle(1, 2, 5, "red"));
+    svg_elem! (circle(1, 2, 5, "red"));
 
-    println!("SVG Ausgabe: {}", svg.to_svg());
+    let shapes = svg_expr!(  
+        circle(80, 70, 30, "purple"),
+        circle(50, 40, 40, "red"),
+        rect(30, 50, 50, 60, "blue"),
+        line(25, 43, 80, 43, "black"),
+        text(30, 40, 20, "Hello", "yellow")
+    );
+
+    // Definiere eine SVG-Zeichnung im Code (Beispiel)
+    let svg = SvgCanvas::new(300, 300, shapes);
+    svg.save("output.svg");
 }
