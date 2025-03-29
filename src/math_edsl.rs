@@ -1,4 +1,4 @@
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 //definiion of an enum to represent mathematical expressions
 pub enum Expr {
     Num(f64),                           //a number (constant)
@@ -157,114 +157,37 @@ impl Expr {
             Expr::Sqrt(a) => format!("\\sqrt{{{}}}", a.to_latex()),
         }
     }
-}
 
-//allows formatted printing of expressions
-// impl fmt::Display for Expr {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, "{}", self.to_string_normal())
-//     }
-// }
-
-pub fn parse_expression(input: &str) -> Result<Expr, String> {
-    let mut chars = input.chars().peekable();
-    parse_sum(&mut chars)
-}
-
-// Hilfsfunktionen zum Parsen von Summe, Term und Faktoren
-fn parse_sum<I>(chars: &mut I) -> Result<Expr, String>
-where
-    I: Iterator<Item = char>,
-{
-    let mut chars = chars.peekable();
-    let mut term = parse_term(&mut chars)?;
-    while let Some(&ch) = chars.peek() {
-        match ch {
-            '+' => {
-                chars.next(); // Consume the '+'
-                let right = parse_term(&mut chars)?;
-                term = Expr::Add(Box::new(term), Box::new(right));
+    pub fn is_ast_equals(&self, other: &Expr) -> bool {
+        match (self, other) {
+            (Expr::Num(a), Expr::Num(b)) => {
+                print!("{}, {}\n", self.to_string_normal(), other.to_string_normal());
+                a == b
+            },
+            (Expr::Var, Expr::Var) => {
+                print!("{}, {}\n", self.to_string_normal(), other.to_string_normal());
+                true
+            },
+            (Expr::Add(a1, b1), Expr::Add(a2, b2)) => {
+                a1.is_ast_equals(a2) && b1.is_ast_equals(b2)
             }
-            '-' => {
-                chars.next(); // Consume the '-'
-                let right = parse_term(&mut chars)?;
-                term = Expr::Sub(Box::new(term), Box::new(right));
+            (Expr::Sub(a1, b1), Expr::Sub(a2, b2)) => {
+                a1.is_ast_equals(a2) && b1.is_ast_equals(b2)
             }
-            _ => break,
+            (Expr::Mul(a1, b1), Expr::Mul(a2, b2)) => {
+                a1.is_ast_equals(a2) && b1.is_ast_equals(b2)
+            }
+            (Expr::Div(a1, b1), Expr::Div(a2, b2)) => {
+                a1.is_ast_equals(a2) && b1.is_ast_equals(b2)
+            }
+            (Expr::Pow(base1, exp1), Expr::Pow(base2, exp2)) => {
+                base1.is_ast_equals(base2) && exp1 == exp2
+            }
+            (Expr::Sqrt(e1), Expr::Sqrt(e2)) => e1.is_ast_equals(e2),
+            _ => {
+                print!("{}, {}\n", self.to_string_normal(), other.to_string_normal());
+                false
+            },
         }
-    }
-    Ok(term)
-}
-
-fn parse_term<I>(chars: &mut I) -> Result<Expr, String>
-where
-    I: Iterator<Item = char>,
-{
-    let mut chars = chars.peekable();
-    let mut factor = parse_factor(&mut chars)?;
-    while let Some(&ch) = chars.peek() {
-        match ch {
-            '*' => {
-                chars.next(); // Consume the '*'
-                let right = parse_factor(&mut chars)?;
-                factor = Expr::Mul(Box::new(factor), Box::new(right));
-            }
-            '/' => {
-                chars.next(); // Consume the '/'
-                let right = parse_factor(&mut chars)?;
-                factor = Expr::Div(Box::new(factor), Box::new(right));
-            }
-            _ => break,
-        }
-    }
-    Ok(factor)
-}
-
-fn parse_factor<I>(chars: &mut I) -> Result<Expr, String>
-where
-    I: Iterator<Item = char>,
-{
-    let mut chars = chars.peekable();
-    if let Some(ch) = chars.next() {
-        match ch {
-            'x' => Ok(Expr::Var),
-            '0'..='9' => {
-                let mut num_str = ch.to_string();
-                while let Some(&next) = chars.peek() {
-                    if next.is_numeric() || next == '.' {
-                        num_str.push(chars.next().unwrap());
-                    } else {
-                        break;
-                    }
-                }
-                num_str.parse::<f64>().map(Expr::Num).map_err(|_| "Ungültige Zahl".to_string())
-            }
-            '(' => {
-                let expr = parse_sum(&mut chars)?;
-                if chars.next() == Some(')') {
-                    Ok(expr)
-                } else {
-                    Err("Erwartete schließende Klammer".to_string())
-                }
-            }
-            's' => {
-                if let Some('q') = chars.next() {
-                    if let Some('r') = chars.next() {
-                        if let Some('t') = chars.next() {
-                            if chars.next() == Some('(') {
-                                let inner = parse_sum(&mut chars)?;
-                                if chars.next() == Some(')') {
-                                    return Ok(Expr::Sqrt(Box::new(inner)));
-                                }
-                            }
-                        }
-                    }
-                }
-                Err("Ungültiger Ausdruck für Sqrt".to_string())
-            }
-            _ => Err("Ungültiges Zeichen".to_string()),
-        }
-    } else {
-        Err("Erwartetes Zeichen".to_string())
     }
 }

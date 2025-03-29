@@ -1,13 +1,48 @@
+// #![feature(trace_macros)]
+// trace_macros!(true);
+
 pub mod macros;
 pub mod math_edsl;
 pub mod svg_edsl;
 
 use my_macro_lib::calculate_expr;
 use svg_edsl::{Shape, SvgCanvas};
+use math_edsl::Expr;
+
+
+fn test(current: Expr, expected: Expr) {
+    if !current.is_ast_equals(&expected) {
+        panic!("Hier ist ein Fehler");
+    }
+}
 
 fn main() {
     // Definiere die mathematische Funktion und den x-Wert im Code
-    let input = expr!(3 + 4 * (2 - 1));
+
+    test(expr!(4.0), Expr::Num(4.0));
+    test(expr!(4.0 + 5.0), Expr::Add(Box::new(Expr::Num(4.0)), Box::new(Expr::Num(5.0))));
+    test(expr!(4.0 * ((5.0^2.0) - 3.0)), Expr::Mul(
+        Box::new(Expr::Num(4.0)),
+        Box::new(Expr::Sub(
+            Box::new(Expr::Pow(Box::new(Expr::Num(5.0)), 2.0)),
+            Box::new(Expr::Num(3.0))
+        ))
+    ));
+    
+    test(expr!((4.0 / 2.0) + x), Expr::Add(
+        Box::new(Expr::Div(
+            Box::new(Expr::Num(4.0)),
+            Box::new(Expr::Num(2.0))
+        )),
+        Box::new(Expr::Var)
+    ));
+
+    let input = expr!(3.0 * (x + 5.0));
+
+    expr!((((((x))))));
+    expr!(asdjfa);
+
+    // Add(3.0, (1.0) + (1.0))
 
     println!("Evaluated Expression: {:?}", input);
 
