@@ -9,17 +9,47 @@ pub mod svg_macros;
 use svg_edsl::SvgCanvas;
 use math_edsl::Expr;
 
-
 fn test(current: Expr, expected: Expr) {
     if !current.is_ast_equals(&expected) {
         panic!("Hier ist ein Fehler");
     }
 }
 
+#[macro_export]
+macro_rules! add_split {
+    ($first:tt $(+ $rest:expr)+) => {{
+        let mut v = vec![stringify!($first)];
+        $(
+            v.push(stringify!($rest));
+        )+
+        v
+    }};
+}
+
+
 fn main() {
     // --------------------math edsl------------------------
+    let input = math_expr!((3.0 * (x + 5.0))/(2.0*(sqrt(4.0))));
+
+    println!("Evaluated Expression: {:?}", input.to_string_normal());
+
+    let x_value = 2.0;
+
+    println!("Berechneter Wert f({}) = {}", x_value, input.eval(x_value));
+
+    // LaTeX-Ausgabe mit Fehlerbehandlung
+    let latex = input.to_latex();
+    println!("LaTeX: {}", latex);
+
+    // Berechnung der Ableitung
+    let derivative = input.derivative().simplify().to_string_normal();
+    println!("Ableitung f'(x): {}", derivative);
+
+    
     test(math_expr!(4.0), Expr::Num(4.0));
+
     test(math_expr!(4.0 + 5.0), Expr::Add(Box::new(Expr::Num(4.0)), Box::new(Expr::Num(5.0))));
+   
     test(math_expr!(4.0 * ((5.0^2.0) - 3.0)), Expr::Mul(
         Box::new(Expr::Num(4.0)),
         Box::new(Expr::Sub(
@@ -36,26 +66,14 @@ fn main() {
         Box::new(Expr::Var)
     ));
 
-    let input = math_expr!(3.0 * (x + 5.0));
-
+   
     math_expr!((((((x))))));
+
+    
     math_expr!(x);
 
-    // Add(3.0, (1.0) + (1.0))
-
-    println!("Evaluated Expression: {:?}", input.to_string_normal());
-
-    let x_value = 2.0;
-
-    println!("Berechneter Wert f({}) = {}", x_value, input.eval(x_value));
-
-    // LaTeX-Ausgabe mit Fehlerbehandlung
-    let latex = input.to_latex();
-    println!("LaTeX: {}", latex);
-
-    // Berechnung der Ableitung
-    let derivative = input.derivative().simplify().to_string_normal();
-    println!("Ableitung f'(x): {}", derivative);
+    math_expr! (5.0 + x);   
+    math_expr! ((sqrt(5.0)) + x);
 
     // --------------------svg edsl------------------------
     svg_elem!(circle(1, 2, 5, "red"));

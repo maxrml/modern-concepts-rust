@@ -38,4 +38,9 @@ macro_rules! math_expr {
     ($base:tt ^ $exp:literal) => {
         crate::math_edsl::Expr::Pow(Box::new(math_expr!($base)), $exp)
     };
+
+    // Sqrt
+    (sqrt($val:tt)) => {
+        crate::math_edsl::Expr::Sqrt(Box::new(math_expr!($val)))
+    }
 }
