@@ -1,8 +1,8 @@
 #[derive(Clone, Debug)]
 //definiion of an enum to represent mathematical expressions
 pub enum Expr {
-    Num(f64),                           //a number (constant)
-    Var,                                //variable x
+    Num(f64),                    //a number (constant)
+    Var,                         //variable x
     Add(Box<Expr>, Box<Expr>),
     Sub(Box<Expr>, Box<Expr>),
     Mul(Box<Expr>, Box<Expr>),
@@ -61,7 +61,7 @@ impl Expr {
         }
     }
 
-    //simplifies the derivative
+    //simplifies the expression
     pub fn simplify(&self) -> Expr {
         match self {
             // Constants stay the same
@@ -91,7 +91,6 @@ impl Expr {
                 }
             }
 
-            // Other operations: Apply simplifications recursively
             Expr::Sub(a, b) => {
                 let a_simp = a.simplify();
                 let b_simp = b.simplify();
@@ -105,10 +104,10 @@ impl Expr {
                 let a_simp = a.simplify();
                 let b_simp = b.simplify();
                 if let Expr::Num(1.0) = b_simp {
-                    return a_simp; 
+                    return a_simp;
                 }
                 if let Expr::Num(0.0) = a_simp {
-                    return Expr::Num(0.0); 
+                    return Expr::Num(0.0);
                 }
                 Expr::Div(Box::new(a_simp), Box::new(b_simp))
             }
@@ -155,39 +154,6 @@ impl Expr {
             Expr::Div(a, b) => format!("\\frac{{{}}}{{{}}}", a.to_latex(), b.to_latex()),
             Expr::Pow(a, n) => format!("{}^{{{}}}", a.to_latex(), n),
             Expr::Sqrt(a) => format!("\\sqrt{{{}}}", a.to_latex()),
-        }
-    }
-
-    pub fn is_ast_equals(&self, other: &Expr) -> bool {
-        match (self, other) {
-            (Expr::Num(a), Expr::Num(b)) => {
-                print!("{}, {}\n", self.to_string_normal(), other.to_string_normal());
-                a == b
-            },
-            (Expr::Var, Expr::Var) => {
-                print!("{}, {}\n", self.to_string_normal(), other.to_string_normal());
-                true
-            },
-            (Expr::Add(a1, b1), Expr::Add(a2, b2)) => {
-                a1.is_ast_equals(a2) && b1.is_ast_equals(b2)
-            }
-            (Expr::Sub(a1, b1), Expr::Sub(a2, b2)) => {
-                a1.is_ast_equals(a2) && b1.is_ast_equals(b2)
-            }
-            (Expr::Mul(a1, b1), Expr::Mul(a2, b2)) => {
-                a1.is_ast_equals(a2) && b1.is_ast_equals(b2)
-            }
-            (Expr::Div(a1, b1), Expr::Div(a2, b2)) => {
-                a1.is_ast_equals(a2) && b1.is_ast_equals(b2)
-            }
-            (Expr::Pow(base1, exp1), Expr::Pow(base2, exp2)) => {
-                base1.is_ast_equals(base2) && exp1 == exp2
-            }
-            (Expr::Sqrt(e1), Expr::Sqrt(e2)) => e1.is_ast_equals(e2),
-            _ => {
-                print!("{}, {}\n", self.to_string_normal(), other.to_string_normal());
-                false
-            },
         }
     }
 }
