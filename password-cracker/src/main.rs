@@ -10,12 +10,13 @@ use rayon::prelude::*;
 use md5::{Md5, Digest};
 use std::ptr;
 use std::intrinsics::{likely, unlikely};
+use sysinfo::{System, SystemExt, ProcessExt, PidExt}; // sysinfo import
 
 const MAX_LEN: usize = 255;
 
 struct FoundResult {
-    candidate: [u8; MAX_LEN + 1], // Statisch-allokierter Puffer inkl. Affix (falls vorhanden)
-    len: usize,                   // Tatsächliche Länge des Strings
+    candidate: [u8; MAX_LEN + 1], // Staatisch Allokierter Puffer
+    len: usize,                   // Länge des Strings
     duration: std::time::Duration,
 }
 
@@ -106,22 +107,16 @@ fn main() -> std::io::Result<()> {
         .map(|_| AtomicPtr::new(ptr::null_mut()))
         .collect();
 
-    // Memory-map rockyou.txt
+    // Memory Mapping of "rockyou.txt"
     let file = File::open("rockyou.txt")?;
     let mmap = unsafe { Mmap::map(&file)? };
     let data = mmap.as_ref();
-
-    // Splitte die Datei in Zeilen (Zero-Copy)
     let lines: Vec<&[u8]> = data.split(|&b| b == b'\n').collect();
-
-    // Die 13 Affixe: '!', '+', '#' und '0'..'9'
     let affixes: &[u8] = b"!#+0123456789";
 
     lines.par_chunks(30000).for_each(|chunk| {
-        let mut local_iter = 0;
         for line in chunk {
-            local_iter += 1;
-            if local_iter % 100 == 0 && unlikely(found_count.load(Ordering::Relaxed) >= num_targets) {
+            if unlikely(found_count.load(Ordering::Relaxed) >= num_targets) {
                 break;
             }
             let len = line.len();
@@ -144,10 +139,8 @@ fn main() -> std::io::Result<()> {
                 }
 
                 // --- Suffix-Varianten ---
-                // Kopiere Kandidaten einmal in einen Puffer.
                 let mut variant_buf = [0u8; MAX_LEN + 1];
                 variant_buf[..candidate_slice.len()].copy_from_slice(candidate_slice);
-                // Erstelle einen MD5-Kontext, der bereits den Kandidaten verarbeitet hat.
                 let mut base_hasher = Md5::new();
                 base_hasher.update(candidate_slice);
                 for &aff in affixes {
@@ -166,7 +159,6 @@ fn main() -> std::io::Result<()> {
                 }
 
                 // --- Präfix-Varianten ---
-                // Hier wird ein gemeinsamer Puffer genutzt, in den der Kandidat ab Index 1 kopiert wird.
                 let mut variant_buf = [0u8; MAX_LEN + 1];
                 variant_buf[1..candidate_slice.len() + 1].copy_from_slice(candidate_slice);
                 for &aff in affixes {
@@ -211,5 +203,22 @@ fn main() -> std::io::Result<()> {
         println!("No passwords were found");
     }
     println!("Total Time: {:?}", elapsed_total);
+
+    // Ausgabe des aktuell verwendeten Speichers mithilfe von sysinfo
+    let mut sys = System::new_all();
+    sys.refresh_all();
+    let pid = sysinfo::get_current_pid().expect("Could't detect current pid");
+    if let Some(process) = sys.process((pid.as_u32() as usize).into()) {
+        let mem_kb = process.memory();
+        let mem_mb = mem_kb as f64 / 1024.0;
+        let mem_gb = mem_mb / 1024.0;
+        println!(
+            "used Ram: {} Byte (~{:.2} kB, ~{:.2} mB)",
+            mem_kb, mem_mb, mem_gb
+        );
+    } else {
+        println!("Process not found.");
+    }
+
     Ok(())
 }
