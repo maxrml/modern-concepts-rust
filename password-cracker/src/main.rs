@@ -10,7 +10,7 @@ use rayon::prelude::*;
 use md5::{Md5, Digest};
 use std::ptr;
 use std::intrinsics::{likely, unlikely};
-use sysinfo::{System, SystemExt, ProcessExt, PidExt}; // sysinfo import
+use sysinfo::{System, SystemExt, ProcessExt, PidExt};
 
 const MAX_LEN: usize = 255;
 
@@ -26,7 +26,7 @@ const TARGET_DIGESTS: [u128; 3] = [
     0xd31daf6579548a2a1bf5a9bd57b5bb89,
 ];
 
-/// Speichert den fertigen Kandidaten, falls der Slot noch leer ist.
+// Speichert den Kandidaten
 unsafe fn store_variant(
     candidate: &[u8],
     start: Instant,
@@ -51,7 +51,7 @@ unsafe fn store_variant(
     false
 }
 
-/// Vergleicht den Digest mit den Zielwerten und ruft bei Übereinstimmung store_variant auf.
+//Guckt welcher Kandidat wo gespeichert werden muss
 #[inline(always)]
 unsafe fn check_digest_variant(
     digest: u128,
@@ -79,8 +79,7 @@ unsafe fn check_digest_variant(
     hit
 }
 
-/// Hilfsfunktion für die Suffix-Varianten, welche den bereits mit dem Kandidaten initialisierten MD5-Kontext klont,
-/// das Affix anhängt und den Hash zurückgibt.
+// Berechnet die Suffix Hashes
 #[inline(always)]
 unsafe fn compute_suffix_hash(base_hasher: &Md5, aff: u8) -> u128 {
     let mut h = base_hasher.clone();
@@ -89,7 +88,7 @@ unsafe fn compute_suffix_hash(base_hasher: &Md5, aff: u8) -> u128 {
     u128::from_be_bytes(d_arr)
 }
 
-/// Hilfsfunktion für Präfix-Varianten. Hier muss ein neuer MD5-Kontext erstellt werden.
+// Berechnet die Prefix Hashes
 #[inline(always)]
 unsafe fn compute_prefix_hash(aff: u8, candidate_slice: &[u8]) -> u128 {
     let mut h = Md5::new();
@@ -107,7 +106,7 @@ fn main() -> std::io::Result<()> {
         .map(|_| AtomicPtr::new(ptr::null_mut()))
         .collect();
 
-    // Memory Mapping of "rockyou.txt"
+    // Memory Mapping von der Datei
     let file = File::open("rockyou.txt")?;
     let mmap = unsafe { Mmap::map(&file)? };
     let data = mmap.as_ref();
@@ -125,7 +124,7 @@ fn main() -> std::io::Result<()> {
             }
             let candidate_slice = line;
             unsafe {
-                // --- Original-Kandidat ---
+                // Original-Kandidat
                 let mut hasher = Md5::new();
                 hasher.update(candidate_slice);
                 let orig_digest_arr: [u8; 16] = hasher.finalize_reset().into();
@@ -138,7 +137,7 @@ fn main() -> std::io::Result<()> {
                     continue;
                 }
 
-                // --- Suffix-Varianten ---
+                // Suffix-Varianten
                 let mut variant_buf = [0u8; MAX_LEN + 1];
                 variant_buf[..candidate_slice.len()].copy_from_slice(candidate_slice);
                 let mut base_hasher = Md5::new();
@@ -150,6 +149,7 @@ fn main() -> std::io::Result<()> {
                     variant_buf[candidate_slice.len()] = aff;
                     let variant_slice = &variant_buf[..candidate_slice.len() + 1];
                     let digest_u128 = compute_suffix_hash(&base_hasher, aff);
+
                     if likely(digest_u128 == TARGET_DIGESTS[0]
                         || digest_u128 == TARGET_DIGESTS[1]
                         || digest_u128 == TARGET_DIGESTS[2])
@@ -158,7 +158,7 @@ fn main() -> std::io::Result<()> {
                     }
                 }
 
-                // --- Präfix-Varianten ---
+                // Präfix-Varianten
                 let mut variant_buf = [0u8; MAX_LEN + 1];
                 variant_buf[1..candidate_slice.len() + 1].copy_from_slice(candidate_slice);
                 for &aff in affixes {
@@ -181,6 +181,7 @@ fn main() -> std::io::Result<()> {
 
     let elapsed_total = start.elapsed();
 
+    //Ausgabe der Ergebnisse und der Zeit
     let mut found_any = false;
     for (i, target) in TARGET_DIGESTS.iter().enumerate() {
         let slot = &results[i];
@@ -204,7 +205,7 @@ fn main() -> std::io::Result<()> {
     }
     println!("Total Time: {:?}", elapsed_total);
 
-    // Ausgabe des aktuell verwendeten Speichers mithilfe von sysinfo
+    // Ausgabe des Speichers
     let mut sys = System::new_all();
     sys.refresh_all();
     let pid = sysinfo::get_current_pid().expect("Could't detect current pid");
