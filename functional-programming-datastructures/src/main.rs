@@ -11,76 +11,92 @@ use std::vec::Vec;
 use stack::Stack;
 
 
-
 fn main() {
-    let mut stack = Stack::new();
-    stack.push(1);
-    stack.push(2);
-    stack.push(3);
-    stack.push(4);
-    stack.push(5);
 
-    println!("Originaler Stack: {}", stack.to_string());
+    let mut my_stack = Stack::new();
+    let mut my_queue = Queue::new();
 
-    println!("Stack mit lazy_map verdoppelt:");
-    let mut mapped_stack = stack.lazy_map(|x| x * 2);
-    while let Some(val) = mapped_stack.next() {
-        print!("{} ", val);
-    }
-    println!();
+    my_stack.push(1);
+    my_stack.push(2);
+    my_stack.push(4);
+    my_stack.push(5);
+    my_stack.push(8);
+    my_stack.push(16);
 
-    println!("Stack mit lazy_filter (nur gerade Zahlen):");
-    let mut filtered_stack = stack.lazy_filter(|x| x % 2 == 0);
-    while let Some(val) = filtered_stack.next() {
-        print!("{} ", val);
-    }
-    println!();
 
-    let mut queue = Queue::new();
-    queue.enqueue(10);
-    queue.enqueue(15);
-    queue.enqueue(20);
-    queue.enqueue(25);
-    queue.enqueue(30);
+    //Closures
+    let square = |&x: &i32| x * x;
+    let plus_one = |&x: &i32| x + 1;
+    let is_even = |x: &i32| x % 2 == 0;
+    let multiply = |x: &i32| x * 3;
 
-    println!("\nOriginale Queue: {:?}", queue.to_string());
+    //map-Funktion
+    let my_list = my_stack.map(square, LinkedListDS::new());
+    println!("Originaler Stack (my_stack): {}", my_stack.to_string());
+    println!("Quadrierter Stack als Liste (my_list): {}\n", my_list.to_string());
 
-    println!("Queue mit lazy_map quadriert:");
-    let mut mapped_queue = queue.lazy_map(|x| x * x);
-    while let Some(val) = mapped_queue.next() {
-        print!("{} ", val);
-    }
-    println!();
+    //Mut Closure
+    let mut counter = 0;
+    let mut plus_counter = |&x: &i32| { 
+        counter += 1; 
+        x + counter 
+    };
 
-    println!("Queue mit lazy_filter (nur > 20):");
-    let mut filtered_queue = queue.lazy_filter(|&x| x > 20);
-    while let Some(val) = filtered_queue.next() {
-        print!("{} ", val);
-    }
-    println!();
+    let mut new_list = my_list.map(&mut plus_counter, LinkedListDS::new());
+        println!("Added Counter to list_values: {}\n", new_list.to_string());
 
-    let mut list = LinkedListDS::new();
-    list.push_back(100);
-    list.push_back(200);
-    list.push_back(300);
-    list.push_back(400);
-    list.push_back(500);
-
-    println!("\nOriginale LinkedList: {}", list.to_string());
-
-    println!("LinkedList mit lazy_map halbiert:");
-    let mut mapped_list = list.lazy_map(|x| x / 2);
-    while let Some(val) = mapped_list.next() {
-        print!("{} ", val);
-    }
-    println!();
-
-    println!("LinkedList mit lazy_filter (>= 300):");
-    let mut filtered_list = list.lazy_filter(|&x| x >= 300);
-    while let Some(val) = filtered_list.next() {
-        print!("{} ", val);
-    }
+    //Verkettung
+    let mut new_queue = new_list.map(plus_one, Stack::new()).map(multiply, Queue::new()).filter(is_even, my_queue);
+    println!("Neue Queue nach verkettetem Aufruf: {}\n", new_queue.to_string());
+    new_queue.enqueue(5);
+    new_queue.enqueue(12);
+    new_queue.enqueue(7);
     
-    println!();
+    //Neuen Stack erstellen und Reduce-Funktion
+    let mut stack = new_queue.map(plus_one, Stack::new());
+    println!("Neuer Stack: {}", stack.to_string());
+    let sum = stack.reduce(|acc, &x| acc + x, 0);
+    println!("Summe (reduce): {}", sum);
+
+    //Neue Liste erstellen mithilfe von for_each:
+    let mut list = LinkedListDS::new();
+    stack.for_each(|&x| list.push_back(x));
+    println!("Die kopierte Liste: {}", list.to_string());
+    let sum = list.reduce(|acc, &x| acc + x, 0);
+    println!("Summe der Liste (gleicher Wert): {} \n", sum);
+
+
+
+
+    //Lazy Funtionen
+    println!("Datenstruktur die für Lazy verwendet wird:{}", stack.to_string());
+    let doubled: Vec<_> = stack.lazy_map(|&x| x * 2).collect();
+    println!("Verdoppelte Werte (lazy_map): {:?}", doubled);
+    
+
+    let filtered: Vec<_> = stack.lazy_filter(|x| *x == 13).collect();
+    println!("Gefilterte Werte (nur 13, lazy_filter): {:?}\n", filtered);
+
+    //Beispiel für Strings:
+    let mut stack = Stack::new();
+
+    // Strings in den Stack pushen
+    stack.push("Hallo");
+    stack.push("Rust");
+    stack.push("Hallo");
+    stack.push("Welt");
+
+    // Demonstration von for_each
+    let mut string_queue = Queue::new();
+    println!("Alle Elemente im Stack:");
+    stack.for_each(|x| {
+            string_queue.enqueue(x.to_uppercase());
+    });
+    println!("Queue mit Großbuchstaben: {}", string_queue.to_string());
+
+    // Demonstration von reduce (verkettete Strings erzeugen)
+    let concatenated = stack.reduce(|acc, x| acc + "+" + x, String::new());
+    println!("Verkettete Strings (reduce): {}", concatenated.trim());
+    
 }
 
