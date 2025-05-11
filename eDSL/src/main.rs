@@ -9,7 +9,6 @@ fn main() {
     let input = math_expr!(2.0 + (x - (2.0 * 3.0)));
     // let input = math_expr!((sqrt(x)));
     // let input = math_expr!((3.0 ^ 2.0)/x);
-    
     println!("Evaluated Expression: {:?}", input.to_string_normal());
 
     let x_value = 2.0;

@@ -58,7 +58,6 @@ macro_rules! svg_expr {
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::svg_edsl::Shape;
 
     #[test]
