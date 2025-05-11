@@ -1,0 +1,11 @@
+[package]
+name = "untitled"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+md-5 = "0.10.6"
+hex = "0.4"
+rayon = "1.8"
+memmap2 = "0.9"
+sysinfo = "0.28"
