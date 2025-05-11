@@ -157,3 +157,68 @@ impl Expr {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::math_expr;
+
+    #[test]
+    fn test_eval_constant_expression() {
+        let expr = math_expr!(3.0 + 5.0);
+        assert_eq!(expr.eval(0.0), 8.0);
+    }
+
+    #[test]
+    fn test_eval_variable_expression() {
+        let expr = math_expr!(x + 2.0);
+        assert_eq!(expr.eval(3.0), 5.0);
+    }
+
+    #[test]
+    fn test_derivative_of_polynomial() {
+        let expr = math_expr!(x ^ 3.0);
+        let deriv = expr.derivative();
+        assert_eq!(deriv.to_string_normal(), "3 * 1 * x^2");
+    }
+
+    #[test]
+    fn test_derivative_of_sum() {
+        let expr = math_expr!(x + 2.0);
+        let deriv = expr.derivative();
+        assert_eq!(deriv.eval(5.0), 1.0);
+    }
+
+    #[test]
+    fn test_to_latex_fraction() {
+        let expr = math_expr!(x / 2.0);
+        assert_eq!(expr.to_latex(), "\\frac{x}{2}");
+    }
+
+    #[test]
+    fn test_to_string_normal_pow() {
+        let expr = math_expr!(x ^ 2.0);
+        assert_eq!(expr.to_string_normal(), "x^2");
+    }
+
+    #[test]
+    fn test_eval_sqrt() {
+        let expr = math_expr!(sqrt(x));
+        let result = expr.eval(25.0);
+        assert_eq!(result, 5.0);
+    }
+    
+    #[test]
+    fn test_eval_longer_expr() {
+        let expr = math_expr!((3.0 ^ 2.0) / x);
+        let result = expr.eval(3.0);
+        assert_eq!(result, 3.0);
+    }
+
+    #[test]
+    fn test_eval_longer_expr_2() {
+        let expr = math_expr!(2.0 + (x - (2.0 * 3.0)));
+        let result = expr.eval(10.0);
+        assert_eq!(result, 6.0);
+    }
+}
