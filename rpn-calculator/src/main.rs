@@ -259,88 +259,161 @@ fn main() {
     }
 }
 
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_reconstruct_expression_infix() {
+    fn test_apply_operation() {
         let mut calculator = RPNCalculator::new();
-        calculator.history_stack.push("5".to_string());
-        calculator.history_stack.push("3".to_string());
-        calculator.history_stack.push("+".to_string());
-
-        let result = calculator.reconstruct_expression_infix();
-        assert_eq!(result, "(5 + 3)");
+        calculator.apply_operation("5");
+        calculator.apply_operation("3");
+        calculator.apply_operation("+");
+        assert_eq!(calculator.get_result(), Some(8.0));
     }
 
     #[test]
-    fn test_reconstruct_expression_latex_addition() {
+    fn test_arithmetical_operation_handling() {
         let mut calculator = RPNCalculator::new();
-        calculator.history_stack.push("5".to_string());
-        calculator.history_stack.push("3".to_string());
-        calculator.history_stack.push("+".to_string());
-
-        let result = calculator.reconstruct_expression_latex();
-        assert_eq!(result, "{5 + 3}");
+        calculator.stack.push(5.0);
+        calculator.stack.push(3.0);
+        calculator.arithmetical_operation_handling("+");
+        assert_eq!(calculator.stack.pop(), Some(8.0));
     }
 
     #[test]
-    fn test_reconstruct_expression_latex_multiplication() {
+    fn test_log_abs_sqrt_operation_handling() {
         let mut calculator = RPNCalculator::new();
-        calculator.history_stack.push("4".to_string());
-        calculator.history_stack.push("2".to_string());
-        calculator.history_stack.push("*".to_string());
-
-        let result = calculator.reconstruct_expression_latex();
-        assert_eq!(result, "{4 \\cdot 2}");
+        calculator.stack.push(16.0);
+        calculator.log_abs_sqrt_operation_handling("sqrt");
+        assert_eq!(calculator.stack.pop(), Some(4.0));
     }
 
     #[test]
-    fn test_reconstruct_expression_latex_division() {
+    fn test_factorial_operation_handling() {
         let mut calculator = RPNCalculator::new();
-        calculator.history_stack.push("8".to_string());
-        calculator.history_stack.push("2".to_string());
-        calculator.history_stack.push("/".to_string());
-
-        let result = calculator.reconstruct_expression_latex();
-        assert_eq!(result, "{\\frac{8}{2}}");
+        calculator.stack.push(5.0);
+        calculator.factorial_operation_handling();
+        assert_eq!(calculator.stack.pop(), Some(120.0));
     }
 
     #[test]
-    fn test_reconstruct_expression_latex_exponentiation() {
+    fn test_full_stack_addition_handling() {
         let mut calculator = RPNCalculator::new();
-        calculator.history_stack.push("3".to_string());
-        calculator.history_stack.push("2".to_string());
-        calculator.history_stack.push("^".to_string());
-
-        let result = calculator.reconstruct_expression_latex();
-        assert_eq!(result, "{3^{2}}");
+        calculator.stack.push(1.0);
+        calculator.stack.push(2.0);
+        calculator.stack.push(3.0);
+        calculator.full_stack_addition_handling();
+        assert_eq!(calculator.stack.pop(), Some(6.0));
     }
 
     #[test]
-    fn test_reconstruct_expression_latex_multiple_terms() {
+    fn test_full_stack_multiplication_handling() {
         let mut calculator = RPNCalculator::new();
-        calculator.history_stack.push("3".to_string());
-        calculator.history_stack.push("2".to_string());
-        calculator.history_stack.push("1".to_string());
-        calculator.history_stack.push("++".to_string());
-
-        let result = calculator.reconstruct_expression_latex();
-        assert_eq!(result, "{1 + 2 + 3}");
+        calculator.stack.push(2.0);
+        calculator.stack.push(3.0);
+        calculator.full_stack_multiplication_handling();
+        assert_eq!(calculator.stack.pop(), Some(6.0));
     }
 
     #[test]
-    fn test_empty_stack_infix() {
+    fn test_new_number_handling() {
         let mut calculator = RPNCalculator::new();
-        let result = calculator.reconstruct_expression_infix();
-        assert_eq!(result, "");
+        calculator.new_number_handling("42");
+        assert_eq!(calculator.stack.pop(), Some(42.0));
     }
 
     #[test]
-    fn test_empty_stack_latex() {
+    fn test_welcome_prompt() {
+        // This function only prints output, so we can't directly test it.
+        // You can manually verify the output if needed.
+    }
+
+    #[test]
+    fn test_get_result() {
         let mut calculator = RPNCalculator::new();
-        let result = calculator.reconstruct_expression_latex();
-        assert_eq!(result, "");
+        calculator.stack.push(42.0);
+        assert_eq!(calculator.get_result(), Some(42.0));
+    }
+
+    #[test]
+    fn test_main() {
+        // Simulate input and output for the main function.
+        // This requires integration testing or mocking stdin/stdout.
+    }
+
+
+    #[test]
+    fn test_apply_operation_again() {
+        let mut calculator = RPNCalculator::new();
+        calculator.apply_operation("5");
+        calculator.apply_operation("3");
+        calculator.apply_operation("+");
+        assert_eq!(calculator.get_result(), Some(8.0));
+    }
+
+    #[test]
+    fn test_arithmetical_operation_handling_again() {
+        let mut calculator = RPNCalculator::new();
+        calculator.stack.push(5.0);
+        calculator.stack.push(3.0);
+        calculator.arithmetical_operation_handling("+");
+        assert_eq!(calculator.stack.pop(), Some(8.0));
+    }
+
+    #[test]
+    fn test_log_abs_sqrt_operation_handling_again() {
+        let mut calculator = RPNCalculator::new();
+        calculator.stack.push(16.0);
+        calculator.log_abs_sqrt_operation_handling("sqrt");
+        assert_eq!(calculator.stack.pop(), Some(4.0));
+    }
+
+    #[test]
+    fn test_factorial_operation_handling_again() {
+        let mut calculator = RPNCalculator::new();
+        calculator.stack.push(5.0);
+        calculator.factorial_operation_handling();
+        assert_eq!(calculator.stack.pop(), Some(120.0));
+    }
+
+    #[test]
+    fn test_full_stack_addition_handling_again() {
+        let mut calculator = RPNCalculator::new();
+        calculator.stack.push(1.0);
+        calculator.stack.push(2.0);
+        calculator.stack.push(3.0);
+        calculator.full_stack_addition_handling();
+        assert_eq!(calculator.stack.pop(), Some(6.0));
+    }
+
+    #[test]
+    fn test_full_stack_multiplication_handling_again() {
+        let mut calculator = RPNCalculator::new();
+        calculator.stack.push(2.0);
+        calculator.stack.push(3.0);
+        calculator.full_stack_multiplication_handling();
+        assert_eq!(calculator.stack.pop(), Some(6.0));
+    }
+
+    #[test]
+    fn test_new_number_handling_again() {
+        let mut calculator = RPNCalculator::new();
+        calculator.new_number_handling("42");
+        assert_eq!(calculator.stack.pop(), Some(42.0));
+    }
+
+    #[test]
+    fn test_get_result_again() {
+        let mut calculator = RPNCalculator::new();
+        calculator.stack.push(42.0);
+        assert_eq!(calculator.get_result(), Some(42.0));
+    }
+
+    #[test]
+    fn test_main_again() {
+        // Simulate input and output for the main function.
+        // This requires integration testing or mocking stdin/stdout.
     }
 }

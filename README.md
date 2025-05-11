@@ -37,7 +37,7 @@ Das Repository ist wie folgt strukturiert:
   - **src/**: Enthält die Hauptlogik in `main.rs`.
   - **Cargo.toml**: Projektkonfiguration für Rust.
 
-- **password-cracker/**: Aufgabe 7: Endübug.
+- **rust-exercise/**: Aufgabe 7: Endübug.
   - **src/**: Enthält die Hauptlogik in `main.rs` und in den Unterordnern der Übungen.
   - **Cargo.toml**: Projektkonfiguration für Rust.
 
