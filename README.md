@@ -59,7 +59,7 @@ Das Repository ist wie folgt strukturiert:
    Navigieren Sie in das jeweilige Projektverzeichnis und führen Sie aus: ```cargo build --release```
 
 2. **Tests starten und Coverage einsehen**
-Grundlegend getestet wird mit ```cargo test```. Die Test Coverage erhält man mit ```cargo install cargo-llvm-cov```und ```cargo llvm-cov --html```, anschließend wird in /target/llvm-cov eine index.html. Die Test Coverage beeinhaltet bei allen Projekten 100%.
+Grundlegend getestet wird mit ```cargo test```. Die Test Coverage erhält man mit ```cargo install cargo-llvm-cov```und ```cargo llvm-cov --html```, anschließend wird in /target/llvm-cov eine index.html. Die Test Coverage beeinhaltet eine sehr gute Abdeckung in allen Methoden außer den main Methoden, hier wäre gegebenfalls Verbesserungspotenzial, jedoch sind die main Methoden nur für provisorische Tests genutzt worden und zur Veranschaulichung für die Vorträge!
 
 3. **Projekte starten**
 
