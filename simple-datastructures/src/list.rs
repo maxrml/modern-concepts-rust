@@ -88,7 +88,6 @@ impl<T: std::fmt::Display + PartialEq + Copy> LinkedList<T> {
     pub fn add(&mut self, element: T) {
         let new_node = Box::new(Node {
             content: element,
-            content: element,
             next: None,
         });
         match self.head.as_mut() {
