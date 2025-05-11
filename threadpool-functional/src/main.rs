@@ -86,7 +86,7 @@ mod tests {
 
     #[test]
     fn test_parallel_map() {
-        let mut list = vec![1, 2, 3, 4, 5];
+        let list = vec![1, 2, 3, 4, 5];
 
         let mapped_data = parallel_map(&list, |x| x * 2);
         assert_eq!(mapped_data, vec![2, 4, 6, 8, 10]);
@@ -94,7 +94,7 @@ mod tests {
 
     #[test]
     fn test_parallel_reduce() {
-        let mut list = vec![1, 2, 3, 4, 5];
+        let list = vec![1, 2, 3, 4, 5];
 
         let data = parallel_reduce(&list, |a, b| a + b, 0);
         assert_eq!(data, 15);
