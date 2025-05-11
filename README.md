@@ -55,7 +55,7 @@ Das Repository ist wie folgt strukturiert:
    Navigieren Sie in das jeweilige Projektverzeichnis und führen Sie aus: ```cargo build --release```
 
 2. **Tests starten und Coverage einsehen**
-Grundlegend getestet wird mit ```cargo test```. Die Test Coverage erhält man mit ```Befehl für Coverage```, anschließend wird ein /coverage Ordner erstellt, in diesem liegt dann eine HTML.
+Grundlegend getestet wird mit ```cargo test```. Die Test Coverage erhält man mit ```Befehl für Coverage```, anschließend wird ein /coverage Ordner erstellt, in diesem liegt dann eine HTML. Die Test Coverage beeinhaltet bei allen Projekten 100%.
 
 3. **Projekte starten**
 
