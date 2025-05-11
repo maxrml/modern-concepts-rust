@@ -258,3 +258,89 @@ fn main() {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_reconstruct_expression_infix() {
+        let mut calculator = RPNCalculator::new();
+        calculator.history_stack.push("5".to_string());
+        calculator.history_stack.push("3".to_string());
+        calculator.history_stack.push("+".to_string());
+
+        let result = calculator.reconstruct_expression_infix();
+        assert_eq!(result, "(5 + 3)");
+    }
+
+    #[test]
+    fn test_reconstruct_expression_latex_addition() {
+        let mut calculator = RPNCalculator::new();
+        calculator.history_stack.push("5".to_string());
+        calculator.history_stack.push("3".to_string());
+        calculator.history_stack.push("+".to_string());
+
+        let result = calculator.reconstruct_expression_latex();
+        assert_eq!(result, "{5 + 3}");
+    }
+
+    #[test]
+    fn test_reconstruct_expression_latex_multiplication() {
+        let mut calculator = RPNCalculator::new();
+        calculator.history_stack.push("4".to_string());
+        calculator.history_stack.push("2".to_string());
+        calculator.history_stack.push("*".to_string());
+
+        let result = calculator.reconstruct_expression_latex();
+        assert_eq!(result, "{4 \\cdot 2}");
+    }
+
+    #[test]
+    fn test_reconstruct_expression_latex_division() {
+        let mut calculator = RPNCalculator::new();
+        calculator.history_stack.push("8".to_string());
+        calculator.history_stack.push("2".to_string());
+        calculator.history_stack.push("/".to_string());
+
+        let result = calculator.reconstruct_expression_latex();
+        assert_eq!(result, "{\\frac{8}{2}}");
+    }
+
+    #[test]
+    fn test_reconstruct_expression_latex_exponentiation() {
+        let mut calculator = RPNCalculator::new();
+        calculator.history_stack.push("3".to_string());
+        calculator.history_stack.push("2".to_string());
+        calculator.history_stack.push("^".to_string());
+
+        let result = calculator.reconstruct_expression_latex();
+        assert_eq!(result, "{3^{2}}");
+    }
+
+    #[test]
+    fn test_reconstruct_expression_latex_multiple_terms() {
+        let mut calculator = RPNCalculator::new();
+        calculator.history_stack.push("3".to_string());
+        calculator.history_stack.push("2".to_string());
+        calculator.history_stack.push("1".to_string());
+        calculator.history_stack.push("++".to_string());
+
+        let result = calculator.reconstruct_expression_latex();
+        assert_eq!(result, "{1 + 2 + 3}");
+    }
+
+    #[test]
+    fn test_empty_stack_infix() {
+        let mut calculator = RPNCalculator::new();
+        let result = calculator.reconstruct_expression_infix();
+        assert_eq!(result, "");
+    }
+
+    #[test]
+    fn test_empty_stack_latex() {
+        let mut calculator = RPNCalculator::new();
+        let result = calculator.reconstruct_expression_latex();
+        assert_eq!(result, "");
+    }
+}
