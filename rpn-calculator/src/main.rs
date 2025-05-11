@@ -265,29 +265,66 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_apply_operation() {
+    fn test_plus() {
         let mut calculator = RPNCalculator::new();
         calculator.apply_operation("5");
         calculator.apply_operation("3");
         calculator.apply_operation("+");
         assert_eq!(calculator.get_result(), Some(8.0));
     }
-
     #[test]
-    fn test_arithmetical_operation_handling() {
+    fn test_minus() {
         let mut calculator = RPNCalculator::new();
-        calculator.stack.push(5.0);
-        calculator.stack.push(3.0);
-        calculator.arithmetical_operation_handling("+");
-        assert_eq!(calculator.stack.pop(), Some(8.0));
+        calculator.apply_operation("5");
+        calculator.apply_operation("3");
+        calculator.apply_operation("-");
+        assert_eq!(calculator.get_result(), Some(2.0));
+    }
+    #[test]
+    fn test_mult() {
+        let mut calculator = RPNCalculator::new();
+        calculator.apply_operation("5");
+        calculator.apply_operation("3");
+        calculator.apply_operation("*");
+        assert_eq!(calculator.get_result(), Some(15.0));
+    }
+    #[test]
+    fn test_divide() {
+        let mut calculator = RPNCalculator::new();
+        calculator.apply_operation("5");
+        calculator.apply_operation("5");
+        calculator.apply_operation("/");
+        assert_eq!(calculator.get_result(), Some(1.0));
+    }
+    #[test]
+    fn test_exponent() {
+        let mut calculator = RPNCalculator::new();
+        calculator.apply_operation("5");
+        calculator.apply_operation("2");
+        calculator.apply_operation("^");
+        assert_eq!(calculator.get_result(), Some(25.0));
     }
 
     #[test]
-    fn test_log_abs_sqrt_operation_handling() {
-        let mut calculator = RPNCalculator::new();
+    fn test_log() {
+        let mut calculator: RPNCalculator = RPNCalculator::new();
+        calculator.stack.push(10.0);
+        calculator.apply_operation("log");
+        assert_eq!(calculator.stack.pop(), Some(1.0));
+    }
+    #[test]
+    fn test_abs() {
+        let mut calculator: RPNCalculator = RPNCalculator::new();
         calculator.stack.push(16.0);
-        calculator.log_abs_sqrt_operation_handling("sqrt");
-        assert_eq!(calculator.stack.pop(), Some(4.0));
+        calculator.apply_operation("abs");
+        assert_eq!(calculator.stack.pop(), Some(16.0));
+    }
+    #[test]
+    fn test_sqr() {
+        let mut calculator: RPNCalculator = RPNCalculator::new();
+        calculator.stack.push(4.0);
+        calculator.apply_operation("sqrt");
+        assert_eq!(calculator.stack.pop(), Some(2.0));
     }
 
     #[test]
