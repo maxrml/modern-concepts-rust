@@ -4,19 +4,21 @@
 
 use memmap2::Mmap;
 use std::fs::File;
-use std::sync::atomic::{AtomicUsize, Ordering, AtomicPtr};
+use std::sync::atomic::{AtomicUsize, AtomicPtr, Ordering};
 use std::time::Instant;
 use rayon::prelude::*;
 use md5::{Md5, Digest};
 use std::ptr;
 use std::intrinsics::{likely, unlikely};
-use sysinfo::{System, SystemExt, ProcessExt, PidExt};
+use sysinfo::{System, SystemExt, ProcessExt};
+use std::env;
 
 const MAX_LEN: usize = 255;
 
 struct FoundResult {
-    candidate: [u8; MAX_LEN + 1], // Staatisch Allokierter Puffer
-    len: usize,                   // Länge des Strings
+    digest: u128,
+    candidate: [u8; MAX_LEN + 1],
+    len: usize,
     duration: std::time::Duration,
 }
 
@@ -26,95 +28,23 @@ const TARGET_DIGESTS: [u128; 3] = [
     0xd31daf6579548a2a1bf5a9bd57b5bb89,
 ];
 
-// Speichert den Kandidaten
-unsafe fn store_variant(
-    candidate: &[u8],
-    start: Instant,
-    found_count: &AtomicUsize,
-    slot: &AtomicPtr<FoundResult>,
-) -> bool {
-    if slot.load(Ordering::Relaxed).is_null() {
-        let mut res_box = Box::new(FoundResult {
-            candidate: [0u8; MAX_LEN + 1],
-            len: candidate.len(),
-            duration: start.elapsed(),
-        });
-        ptr::copy_nonoverlapping(candidate.as_ptr(), res_box.candidate.as_mut_ptr(), candidate.len());
-        let res_ptr = Box::into_raw(res_box);
-        if slot.compare_exchange(ptr::null_mut(), res_ptr, Ordering::SeqCst, Ordering::SeqCst).is_ok() {
-            found_count.fetch_add(1, Ordering::Relaxed);
-            return true;
-        } else {
-            let _ = Box::from_raw(res_ptr);
-        }
-    }
-    false
-}
-
-//Guckt welcher Kandidat wo gespeichert werden muss
-#[inline(always)]
-unsafe fn check_digest_variant(
-    digest: u128,
-    candidate: &[u8],
-    start: Instant,
-    found_count: &AtomicUsize,
-    results: &[AtomicPtr<FoundResult>],
-) -> bool {
-    let mut hit = false;
-    if likely(digest == TARGET_DIGESTS[0]) {
-        if store_variant(candidate, start, found_count, &results[0]) {
-            hit = true;
-        }
-    }
-    if likely(digest == TARGET_DIGESTS[1]) {
-        if store_variant(candidate, start, found_count, &results[1]) {
-            hit = true;
-        }
-    }
-    if likely(digest == TARGET_DIGESTS[2]) {
-        if store_variant(candidate, start, found_count, &results[2]) {
-            hit = true;
-        }
-    }
-    hit
-}
-
-// Berechnet die Suffix Hashes
-#[inline(always)]
-unsafe fn compute_suffix_hash(base_hasher: &Md5, aff: u8) -> u128 {
-    let mut h = base_hasher.clone();
-    h.update(&[aff]);
-    let d_arr: [u8; 16] = h.finalize_reset().into();
-    u128::from_be_bytes(d_arr)
-}
-
-// Berechnet die Prefix Hashes
-#[inline(always)]
-unsafe fn compute_prefix_hash(aff: u8, candidate_slice: &[u8]) -> u128 {
-    let mut h = Md5::new();
-    h.update(&[aff]);
-    h.update(candidate_slice);
-    let d_arr: [u8; 16] = h.finalize_reset().into();
-    u128::from_be_bytes(d_arr)
-}
-
-fn main() -> std::io::Result<()> {
-    let start = Instant::now();
+/// Runs the cracker against the given wordlist path and returns printed lines
+fn crack_wordlist(path: &str) -> Vec<String> {
+    let start_total = Instant::now();
     let num_targets = TARGET_DIGESTS.len();
     let found_count = AtomicUsize::new(0);
     let results: Vec<AtomicPtr<FoundResult>> = (0..num_targets)
         .map(|_| AtomicPtr::new(ptr::null_mut()))
         .collect();
 
-    // Memory Mapping von der Datei
-    let file = File::open("rockyou.txt")?;
-    let mmap = unsafe { Mmap::map(&file)? };
+    let file = File::open(path).expect("Cannot open wordlist");
+    let mmap = unsafe { Mmap::map(&file).expect("Cannot mmap file") };
     let data = mmap.as_ref();
     let lines: Vec<&[u8]> = data.split(|&b| b == b'\n').collect();
     let affixes: &[u8] = b"!#+0123456789";
 
-    lines.par_chunks(30000).for_each(|chunk| {
-        for line in chunk {
+    lines.par_chunks(30_000).for_each(|chunk| {
+        for &line in chunk {
             if unlikely(found_count.load(Ordering::Relaxed) >= num_targets) {
                 break;
             }
@@ -122,104 +52,145 @@ fn main() -> std::io::Result<()> {
             if len == 0 || len > MAX_LEN {
                 continue;
             }
-            let candidate_slice = line;
             unsafe {
-                // Original-Kandidat
-                let mut hasher = Md5::new();
-                hasher.update(candidate_slice);
-                let orig_digest_arr: [u8; 16] = hasher.finalize_reset().into();
-                let orig_digest = u128::from_be_bytes(orig_digest_arr);
-                if likely(orig_digest == TARGET_DIGESTS[0]
-                    || orig_digest == TARGET_DIGESTS[1]
-                    || orig_digest == TARGET_DIGESTS[2])
-                {
-                    let _ = store_variant(candidate_slice, start, &found_count, &results[0]);
+                // Original candidate
+                let mut h = Md5::new(); h.update(line);
+                let orig_digest = u128::from_be_bytes(h.finalize_reset().into());
+                if likely(
+                    orig_digest == TARGET_DIGESTS[0] ||
+                        orig_digest == TARGET_DIGESTS[1] ||
+                        orig_digest == TARGET_DIGESTS[2]
+                ) {
+                    let _ = store_result(orig_digest, line, &start_total, &found_count, &results);
                     continue;
                 }
-
-                // Suffix-Varianten
-                let mut variant_buf = [0u8; MAX_LEN + 1];
-                variant_buf[..candidate_slice.len()].copy_from_slice(candidate_slice);
-                let mut base_hasher = Md5::new();
-                base_hasher.update(candidate_slice);
+                // Suffix variants
+                let mut buf = [0u8; MAX_LEN + 1];
+                buf[..len].copy_from_slice(line);
+                let mut base = Md5::new(); base.update(line);
                 for &aff in affixes {
-                    if unlikely(found_count.load(Ordering::Relaxed) >= num_targets) {
-                        break;
-                    }
-                    variant_buf[candidate_slice.len()] = aff;
-                    let variant_slice = &variant_buf[..candidate_slice.len() + 1];
-                    let digest_u128 = compute_suffix_hash(&base_hasher, aff);
-
-                    if likely(digest_u128 == TARGET_DIGESTS[0]
-                        || digest_u128 == TARGET_DIGESTS[1]
-                        || digest_u128 == TARGET_DIGESTS[2])
-                    {
-                        let _ = check_digest_variant(digest_u128, variant_slice, start, &found_count, &results);
+                    if unlikely(found_count.load(Ordering::Relaxed) >= num_targets) { break; }
+                    buf[len] = aff;
+                    let d = compute_suffix(&base, aff);
+                    if likely(
+                        d == TARGET_DIGESTS[0] ||
+                            d == TARGET_DIGESTS[1] ||
+                            d == TARGET_DIGESTS[2]
+                    ) {
+                        let _ = store_result(d, &buf[..len+1], &start_total, &found_count, &results);
                     }
                 }
-
-                // Präfix-Varianten
-                let mut variant_buf = [0u8; MAX_LEN + 1];
-                variant_buf[1..candidate_slice.len() + 1].copy_from_slice(candidate_slice);
+                // Prefix variants
+                let mut buf = [0u8; MAX_LEN + 1];
+                buf[1..len+1].copy_from_slice(line);
                 for &aff in affixes {
-                    if unlikely(found_count.load(Ordering::Relaxed) >= num_targets) {
-                        break;
-                    }
-                    variant_buf[0] = aff;
-                    let variant_slice = &variant_buf[..candidate_slice.len() + 1];
-                    let digest_u128 = compute_prefix_hash(aff, candidate_slice);
-                    if likely(digest_u128 == TARGET_DIGESTS[0]
-                        || digest_u128 == TARGET_DIGESTS[1]
-                        || digest_u128 == TARGET_DIGESTS[2])
-                    {
-                        let _ = check_digest_variant(digest_u128, variant_slice, start, &found_count, &results);
+                    if unlikely(found_count.load(Ordering::Relaxed) >= num_targets) { break; }
+                    buf[0] = aff;
+                    let d = compute_prefix(aff, line);
+                    if likely(
+                        d == TARGET_DIGESTS[0] ||
+                            d == TARGET_DIGESTS[1] ||
+                            d == TARGET_DIGESTS[2]
+                    ) {
+                        let _ = store_result(d, &buf[..len+1], &start_total, &found_count, &results);
                     }
                 }
             }
         }
     });
 
-    let elapsed_total = start.elapsed();
-
-    //Ausgabe der Ergebnisse und der Zeit
-    let mut found_any = false;
-    for (i, target) in TARGET_DIGESTS.iter().enumerate() {
-        let slot = &results[i];
-        let ptr = slot.load(Ordering::SeqCst);
+    // Collect output with correct durations
+    let mut output = Vec::new();
+    for (i, &tg) in TARGET_DIGESTS.iter().enumerate() {
+        let ptr = results[i].load(Ordering::SeqCst);
         if !ptr.is_null() {
-            found_any = true;
             unsafe {
                 let res = Box::from_raw(ptr);
-                let candidate_str = std::str::from_utf8(&res.candidate[..res.len]).unwrap_or("Invalid UTF-8");
-                println!(
-                    "Target Hash: {:032x} => Password: {} (Found in {:?})",
-                    target,
-                    candidate_str,
-                    res.duration
-                );
+                let pwd = std::str::from_utf8(&res.candidate[..res.len]).unwrap_or("invalid utf8");
+                output.push(format!(
+                    "Target Hash: {:032x} => Password: {} (Found in {:.6}s)",
+                    res.digest,
+                    pwd,
+                    res.duration.as_secs_f64()
+                ));
             }
         }
     }
-    if !found_any {
-        println!("No passwords were found");
+    // Total run time
+    let total = start_total.elapsed().as_secs_f64();
+    output.push(format!("Total Time: {:.6}s", total));
+    // Memory usage
+    let mut sys = System::new_all(); sys.refresh_all();
+    if let Some(p) = sys.process(sysinfo::get_current_pid().unwrap()) {
+        output.push(format!("used Ram: {:.2} MB", p.memory() as f64 / 1024.0));
     }
-    println!("Total Time: {:?}", elapsed_total);
+    output
+}
 
-    // Ausgabe des Speichers
-    let mut sys = System::new_all();
-    sys.refresh_all();
-    let pid = sysinfo::get_current_pid().expect("Could't detect current pid");
-    if let Some(process) = sys.process((pid.as_u32() as usize).into()) {
-        let mem_kb = process.memory();
-        let mem_mb = mem_kb as f64 / 1024.0;
-        let mem_gb = mem_mb / 1024.0;
-        println!(
-            "used Ram: {} Byte (~{:.2} kB, ~{:.2} mB)",
-            mem_kb, mem_mb, mem_gb
-        );
-    } else {
-        println!("Process not found.");
+unsafe fn store_result(
+    digest: u128,
+    candidate: &[u8],
+    start: &Instant,
+    found_count: &AtomicUsize,
+    results: &[AtomicPtr<FoundResult>],
+) -> bool {
+    for (i, &tg) in TARGET_DIGESTS.iter().enumerate() {
+        if digest == tg && results[i].load(Ordering::Relaxed).is_null() {
+            let mut b = Box::new(FoundResult {
+                digest,
+                candidate: [0; MAX_LEN + 1],
+                len: candidate.len(),
+                duration: start.elapsed(),
+            });
+            ptr::copy_nonoverlapping(candidate.as_ptr(), b.candidate.as_mut_ptr(), b.len);
+            let ptr_box = Box::into_raw(b);
+            if results[i].compare_exchange(ptr::null_mut(), ptr_box, Ordering::SeqCst, Ordering::SeqCst).is_ok() {
+                found_count.fetch_add(1, Ordering::Relaxed);
+                return true;
+            } else {
+                let _ = Box::from_raw(ptr_box);
+            }
+        }
     }
+    false
+}
 
+unsafe fn compute_suffix(base: &Md5, aff: u8) -> u128 {
+    let mut h = base.clone();
+    h.update(&[aff]);
+    u128::from_be_bytes(h.finalize_reset().into())
+}
+
+unsafe fn compute_prefix(aff: u8, slice: &[u8]) -> u128 {
+    let mut h = Md5::new();
+    h.update(&[aff]);
+    h.update(slice);
+    u128::from_be_bytes(h.finalize_reset().into())
+}
+
+fn main() -> std::io::Result<()> {
+    let wordlist = env::args().nth(1).unwrap_or_else(|| "rockyou.txt".into());
+    let results = crack_wordlist(&wordlist);
+    for line in results {
+        println!("{}", line);
+    }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::crack_wordlist;
+    use std::fs;
+    use std::env::temp_dir;
+
+    #[test]
+    fn check_passwords_in_output() {
+        let mut path = temp_dir();
+        path.push("test_wl.txt");
+        fs::write(&path, "+ ann1792\n123mango\nMeatloaf9\n").unwrap();
+        let out = crack_wordlist(path.to_str().unwrap());
+        for pwd in &["+ ann1792", "123mango#", "Meatloaf9"] {
+            assert!(out.iter().any(|l| l.contains(pwd)), "Expected '{}' in output, got {:?}", pwd, out);
+        }
+    }
 }
