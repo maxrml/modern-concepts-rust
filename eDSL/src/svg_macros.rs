@@ -56,6 +56,8 @@ macro_rules! svg_expr {
         compile_error!(concat!("Unbekanntes SVG-Element oder falsche Parameter: ", stringify!($($anything)*)));
     };
 }
+
+// tests:
 #[cfg(test)]
 mod tests {
     use crate::svg_edsl::Shape;

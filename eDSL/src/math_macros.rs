@@ -45,11 +45,9 @@ macro_rules! math_expr {
     }
 }
 
+// tests:
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::math_edsl::Expr;
-
     #[test]
     fn test_var() {
         let expr = math_expr!(x);
