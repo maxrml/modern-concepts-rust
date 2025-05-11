@@ -56,3 +56,63 @@ macro_rules! svg_expr {
         compile_error!(concat!("Unbekanntes SVG-Element oder falsche Parameter: ", stringify!($($anything)*)));
     };
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::svg_edsl::Shape;
+
+    #[test]
+    fn test_circle_macro() {
+        let shape = svg_elem!(circle(10, 20, 30, "blue"));
+        if let Shape::Circle { cx, cy, r, fill } = shape {
+            assert_eq!(cx, 10);
+            assert_eq!(cy, 20);
+            assert_eq!(r, 30);
+            assert_eq!(fill, "blue");
+        } else {
+            panic!("Expected Circle");
+        }
+    }
+
+    #[test]
+    fn test_rect_macro() {
+        let shape = svg_elem!(rect(10, 20, 100, 200, "green"));
+        if let Shape::Rect { x, y, width, height, fill } = shape {
+            assert_eq!(x, 10);
+            assert_eq!(y, 20);
+            assert_eq!(width, 100);
+            assert_eq!(height, 200);
+            assert_eq!(fill, "green");
+        } else {
+            panic!("Expected Rect");
+        }
+    }
+
+    #[test]
+    fn test_line_macro() {
+        let shape = svg_elem!(line(0, 0, 100, 100, "black"));
+        if let Shape::Line { x1, y1, x2, y2, stroke } = shape {
+            assert_eq!(x1, 0);
+            assert_eq!(y1, 0);
+            assert_eq!(x2, 100);
+            assert_eq!(y2, 100);
+            assert_eq!(stroke, "black");
+        } else {
+            panic!("Expected Line");
+        }
+    }
+
+    #[test]
+    fn test_text_macro() {
+        let shape = svg_elem!(text(5, 10, 12, "Hello", "red"));
+        if let Shape::Text { x, y, size, text, fill } = shape {
+            assert_eq!(x, 5);
+            assert_eq!(y, 10);
+            assert_eq!(size, 12);
+            assert_eq!(text, "Hello");
+            assert_eq!(fill, "red");
+        } else {
+            panic!("Expected Text");
+        }
+    }
+}

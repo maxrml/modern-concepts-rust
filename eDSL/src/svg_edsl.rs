@@ -119,3 +119,63 @@ impl SvgCanvas {
         println!("{} successfully saved", filename)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_svg_circle() {
+        let shape = Shape::Circle {
+            cx: 50,
+            cy: 50,
+            r: 25,
+            fill: "blue".to_string(),
+        };
+        let canvas = SvgCanvas::new(100, 100, vec![shape]);
+        let svg = canvas.to_svg();
+        assert!(svg.contains("<circle cx=\"50\" cy=\"50\" r=\"25\" fill=\"blue\" />"));
+    }
+    
+    #[test]
+    fn test_svg_rect() {
+        let shape = Shape::Rect {
+            x: 10,
+            y: 20,
+            width: 80,
+            height: 40,
+            fill: "green".to_string(),
+        };
+        let canvas = SvgCanvas::new(100, 100, vec![shape]);
+        let svg = canvas.to_svg();
+        assert!(svg.contains("<rect x=\"10\" y=\"20\" width=\"80\" height=\"40\" fill=\"green\" />"));
+    }
+    
+    #[test]
+    fn test_svg_line() {
+        let shape = Shape::Line {
+            x1: 0,
+            y1: 0,
+            x2: 100,
+            y2: 100,
+            stroke: "black".to_string(),
+        };
+        let canvas = SvgCanvas::new(120, 120, vec![shape]);
+        let svg = canvas.to_svg();
+        assert!(svg.contains("<line x1=\"0\" y1=\"0\" x2=\"100\" y2=\"100\" stroke=\"black\" />"));
+    }
+    
+    #[test]
+    fn test_svg_text() {
+        let shape = Shape::Text {
+            x: 15,
+            y: 30,
+            size: 16,
+            text: "Test".to_string(),
+            fill: "red".to_string(),
+        };
+        let canvas = SvgCanvas::new(200, 50, vec![shape]);
+        let svg = canvas.to_svg();
+        assert!(svg.contains("<text x=\"15\" y=\"30\" font-size=\"16\" fill=\"red\">Test</text>"));
+    }    
+}
