@@ -33,8 +33,12 @@ Das Repository ist wie folgt strukturiert:
   - **output.svg**: Beispielausgabe der SVG-DSL.
   - **Cargo.toml**: Projektkonfiguration für Rust.
 
-- **password-cracker/**: Aufgabe 6: Hashvergleiche in der rockyou.txt.
+- **password-cracker/**: Aufgabe 6: Hashvergleiche in der rockyou.txt (bei bedarf diese Datei auszuführen die rockyou.txt hinzufügen in den src Ordner).
   - **src/**: Enthält die Hauptlogik in `main.rs`.
+  - **Cargo.toml**: Projektkonfiguration für Rust.
+
+- **password-cracker/**: Aufgabe 7: Endübug.
+  - **src/**: Enthält die Hauptlogik in `main.rs` und in den Unterordnern der Übungen.
   - **Cargo.toml**: Projektkonfiguration für Rust.
 
 - **README.md**: Diese Datei, die die Struktur des Repositories und die Build-Anweisungen erklärt.
